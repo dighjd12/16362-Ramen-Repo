@@ -1,0 +1,38 @@
+function neatoEncoderEventListener (obj, msg)
+
+        global neatoEncoderDataTimestamp;
+        global neatoEncoderLeft;
+    %    global neatoEncoderRight;
+       % global neatoEncoderFrame;
+
+    %persistent neatoEncoderFrame;
+        
+        
+       % global leftArray;
+        global timeArray;
+        global leftArray;
+        global vlSoFar;
+        global vrSoFar;
+        
+        %initialize
+    %    if isempty(neatoEncoderFrame)
+     %       neatoEncoderFrame = 0;
+      %  end
+        
+        neatoEncoderDataTimestamp = obj.LatestMessage.Header.Stamp.Sec +(obj.LatestMessage.Header.Stamp.Nsec/1000000000);
+        neatoEncoderLeft = obj.LatestMessage.Left
+    %    neatoEncoderRight = obj.LatestMessage.Right;
+     %   neatoEncoderFrame = neatoEncoderFrame + 1;
+        
+        vlFeedback = (neatoEncoderLeft - leftArray())./(neatoEncoderDataTimestamp - timeArray(length(timeArray)));
+        
+        timeArray = [timeArray, neatoEncoderDataTimestamp];
+        leftArray = [leftArray, neatoEncoderLeft];
+        
+        vlSoFar = [vlSoFar, vlFeedback];
+        vrSoFar = [vrSoFar, vrFeedback];
+    
+    [x, y, th] = modelDiffSteerRobot(vlSoFar, vrSoFar, t0, t_i, dt);
+
+end
+

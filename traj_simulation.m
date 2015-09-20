@@ -22,6 +22,10 @@ function traj_simulation()
  
     
     %% clothoid
+    
+    t0 = 0;
+    dt = 0.001;
+    
     k = 2;
     tf = 11.207*k;
     t = t0:dt:tf;
@@ -34,6 +38,10 @@ function traj_simulation()
     y_clothoid = y.*dt;
     
     %% figure eight
+    
+    t0 = 0;
+    dt = 0.001;
+    
     k_s = 0.5;
     k_v = 0.4;
     tf = round(12.565 * k_s/k_v);
@@ -43,8 +51,8 @@ function traj_simulation()
     v_l = 1000 .* (0.3*k_v - 0.14125*(k_v/k_s) * sin((t.*k_v)./(2*k_s)));
     
     [x, y, th] = modelDiffSteerRobot(v_l, v_r, t0, tf, dt);
-    x_figure8 = x.*dt;
-    y_figure8 = y.*dt;
+  %  x_figure8 = x.*dt;
+   % y_figure8 = y.*dt;
 
     %% plot clothoid
     figure(1);
