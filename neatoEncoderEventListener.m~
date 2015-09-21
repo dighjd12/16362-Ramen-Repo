@@ -2,15 +2,17 @@ function neatoEncoderEventListener (obj, msg)
 
         global neatoEncoderDataTimestamp;
         global neatoEncoderLeft;
-    %    global neatoEncoderRight;
-       % global neatoEncoderFrame;
+        global neatoEncoderRight;
+        global neatoEncoderFrame;
 
     %persistent neatoEncoderFrame;
-        
+        global vlFeedback;
+        global vrFeedback;
         
        % global leftArray;
         global timeArray;
         global leftArray;
+        global rightArray;
         global vlSoFar;
         global vrSoFar;
         
@@ -19,20 +21,41 @@ function neatoEncoderEventListener (obj, msg)
      %       neatoEncoderFrame = 0;
       %  end
         
-        neatoEncoderDataTimestamp = obj.LatestMessage.Header.Stamp.Sec +(obj.LatestMessage.Header.Stamp.Nsec/1000000000);
-        neatoEncoderLeft = obj.LatestMessage.Left
-    %    neatoEncoderRight = obj.LatestMessage.Right;
+        neatoEncoderDataTimestamp = obj.LatestMessage.Header.Stamp.Sec +(obj.LatestMessage.Header.Stamp.Nsec/(10^8));
+        neatoEncoderLeft = obj.LatestMessage.Left;
+        neatoEncoderRight = obj.LatestMessage.Right;
      %   neatoEncoderFrame = neatoEncoderFrame + 1;
         
-        vlFeedback = (neatoEncoderLeft - leftArray())./(neatoEncoderDataTimestamp - timeArray(length(timeArray)));
+        if(isempty(timeArray))
+            timeArray = [timeArray, neatoEncoderDataTimestamp];
+            leftArray = [leftArray, neatoEncoderLeft];
+            rightArray = [rightArray, neatoEncoderRight];
+            neatoEncoderFrame =0;
+            vlSoFar = zeros(1);
+            vrSoFar = zeros(1);
+        end
         
-        timeArray = [timeArray, neatoEncoderDataTimestamp];
-        leftArray = [leftArray, neatoEncoderLeft];
-        
-        vlSoFar = [vlSoFar, vlFeedback];
-        vrSoFar = [vrSoFar, vrFeedback];
-    
-    [x, y, th] = modelDiffSteerRobot(vlSoFar, vrSoFar, t0, t_i, dt);
+        if timeArray(length(timeArray))~=neatoEncoderDataTimestamp
+            %increase timeArray, leftArray, rightArray, and compute vl vr
+            
+            timeArray = [timeArray, neatoEncoderDataTimestamp];
+            leftArray = [leftArray, neatoEncoderLeft];
+            rightArray = [rightArray, neatoEncoderRight];
+            
+            timeDiff = (timeArray(length(timeArray)) - timeArray(length(timeArray)-1));
+            timeDiff = double(timeDiff);
+            vlFeedback = (leftArray(length(leftArray)) - leftArray(length(leftArray)-1))./timeDiff;
+            vrFeedback = (rightArray(length(rightArray)) - rightArray(length(rightArray)-1))./timeDiff;
+            vlFeedback = double(vlFeedback);
+            vrFeedback = double(vrFeedback);
+            
+            
+            vlSoFar = [vlSoFar, (vlFeedback)];
+            vrSoFar = [vrSoFar, (vrFeedback)];
+        end
+   
+        neatoEncoderFrame = neatoEncoderFrame +1;
 
+      %  pause(0.005);
 end
 

@@ -15,7 +15,7 @@
 % Last Edit:    9/19/2015
 function [x, y, th] = modelDiffSteerRobot(vl, vr, t0, tf, dt)
   % set up return values - set all to 0 to start
-  time_period = (tf-t0)/dt;
+  time_period = round((tf-t0)/dt);
   W = 234.95; % robot base width
 
   if time_period <= 0
@@ -23,9 +23,9 @@ function [x, y, th] = modelDiffSteerRobot(vl, vr, t0, tf, dt)
   end
 
   % create empty vectors to optimize odometry loop
-  x  = zeros(1,time_period);
-  y  = zeros(1,time_period);
-  th = zeros(1,time_period);
+  x  = zeros(1,length(vr));
+  y  = zeros(1,length(vr));
+  th = zeros(1,length(vr));
   
   %% Initialize Robot Starting Position and Angle 
   % initialize all to 0
