@@ -100,10 +100,11 @@ robot.sendVelocity(0.0,0.0);
 robot.encoders.NewMessageFcn=@neatoEncoderEventListener;
 %set up vr and vl and t
 global timeArray;
-global leftArray;
-global rightArray;
+%global leftArray;
+%global rightArray;
 global vlSoFar;
 global vrSoFar;
+global timeDiff;
 
 vlSoFar = zeros(1);
 vrSoFar = zeros(1);
@@ -121,7 +122,7 @@ t = 0;
 vr = double(1000*(0.3*kv + 0.14125*kv/ks * sin(t*kv/(2*ks))));
 vl = double(1000*(0.3*kv - 0.14125*kv/ks * sin(t*kv/(2*ks))));
 t0 = 0;
-dt = 1;    
+%dt = 1;    
 %time_period = round((tf-t0)/dt);
 tic;
 
@@ -129,8 +130,8 @@ tic;
   y  = zeros(1,16);
   
   myPlot = plot(x,y);
- % xlim([-0.5 0.5]);
- % ylim([-0.5 0.5]);
+  %xlim([-0.5 0.5]);
+  %ylim([-0.5 0.5]);
   
 %loop to move the robot by unpdating vl and vr
 while (t < tf)
@@ -142,12 +143,16 @@ while (t < tf)
     vr = double(1000*(0.3*kv + 0.14125*kv/ks * sin(t*kv/(2*ks))));
     vl = double(1000*(0.3*kv - 0.14125*kv/ks * sin(t*kv/(2*ks))));
   
+    if(length(timeArray)~=0)
     tfinal = timeArray(length(timeArray)) - timeArray(1);
-    
+    dt = timeDiff;
     [x, y, th] = modelDiffSteerRobot(vlSoFar, vrSoFar, t0, tfinal, dt);
     
-    set(myPlot, 'Xdata', x.*dt, 'Ydata', y.*dt);
+    %set(myPlot, 'Xdata', x.*dt, 'Ydata', y.*dt);
+    set(myPlot, 'Xdata', x, 'Ydata', y);
     pause(0.001);
+    end
+    
     % put that into modelDiffSteerRobot
     % plot x,y real time
 end
@@ -157,10 +162,10 @@ robot.encoders.NewMessageFcn = [];
 
 %%
 
-robot.close()
-clear all
+robot.close();
+clear all;
 
 %%
 
-robot = neato('');
+robot = neato('hecto');
 

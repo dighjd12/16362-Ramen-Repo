@@ -15,7 +15,11 @@
 % Last Edit:    9/19/2015
 function [x, y, th] = modelDiffSteerRobot(vl, vr, t0, tf, dt)
   % set up return values - set all to 0 to start
-  time_period = round((tf-t0)/dt);
+  
+  dt = (tf-t0)/(length(vr))
+  
+  time_period = round((tf-t0)./dt);
+  l = length(vr);
   W = 234.95; % robot base width
 
   if time_period <= 0
@@ -41,14 +45,14 @@ function [x, y, th] = modelDiffSteerRobot(vl, vr, t0, tf, dt)
  % xlim([-0.5 0.5]);
  % ylim([-0.5 0.5]);
   
-  for k = 1:(length(vr)-1)  %time_period+1
+  for k = 1:length(vr)-1
     % update linear and angular velocity of robot
     V = (vr(k) + vl(k))/2;
     omega = (vr(k) - vl(k))/W;  
     
     % calculate next position    
     th(k+1) = th(k) + omega       *dt;    
-    x(k+1)  = x(k)  + V*cos(th(k))*dt;    
+    x(k+1)  = x(k)  + V*cos(th(k))*dt;  
     y(k+1)  = y(k)  + V*sin(th(k))*dt;
     
    % set(myPlot, 'Xdata', x.*dt, 'Ydata', y.*dt);
