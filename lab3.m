@@ -117,7 +117,7 @@ W = 234.95; % robot base width
 
 ks = 0.5;
 kv = 0.4;
-tf = 12.565*ks/kv;
+tf = 12.565*ks/kv + 1;
 t = 0; 
 vr = double(1000*(0.3*kv + 0.14125*kv/ks * sin(t*kv/(2*ks))));
 vl = double(1000*(0.3*kv - 0.14125*kv/ks * sin(t*kv/(2*ks))));
@@ -130,8 +130,8 @@ tic;
   y  = zeros(1,16);
   
   myPlot = plot(x,y);
-  %xlim([-0.5 0.5]);
-  %ylim([-0.5 0.5]);
+  xlim([-500 500]);
+  ylim([-500 500]);
   
 %loop to move the robot by unpdating vl and vr
 while (t < tf)
@@ -167,5 +167,5 @@ clear all;
 
 %%
 
-robot = neato('hecto');
+robot = neato('atto');
 

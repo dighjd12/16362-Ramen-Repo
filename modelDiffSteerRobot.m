@@ -16,10 +16,10 @@
 function [x, y, th] = modelDiffSteerRobot(vl, vr, t0, tf, dt)
   % set up return values - set all to 0 to start
   
-  dt = (tf-t0)/(length(vr))
+  dt = (tf-t0)/(length(vr));
   
   time_period = round((tf-t0)./dt);
-  l = length(vr);
+ % l = length(vr);
   W = 234.95; % robot base width
 
   if time_period <= 0
