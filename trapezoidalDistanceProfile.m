@@ -17,7 +17,7 @@ if(t<tramp) %at the first ramp
     sref = amax*t^2/2; %integral of amax*t, assuming t_initial = 0;
 end
 
-if(tramp<t<(tf-tramp)) %in between the ramps
+if(tramp<t && t<(tf-tramp)) %in between the ramps
     sref = vmax*(t-tramp) + amax*tramp^2/2;
 end
 
