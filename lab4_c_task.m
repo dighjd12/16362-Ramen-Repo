@@ -1,6 +1,6 @@
 %% dafdafsd
 
-robot = neato('exa');
+robot = neato('yotta');
 
 %%
 
@@ -8,10 +8,13 @@ robot.close();
 clear all;
 %% warm up 3.1
 
+feedback = true; %boolean deciding to add feedback factor
+
 %int_dist = 20;
 timeArray = zeros(1,1);
 distArray = zeros(1,1); % create 1x1 matrix with value 0
-srefArray = zeros(1,1);
+urealArray = zeros(1,1);
+
 sDelayArray = zeros(1,1);
 errorArray = zeros(1,1);
 
@@ -28,12 +31,13 @@ amax = 3*0.25;
 dist = 1;
 sign = 1; %change this to a negative number if the goal is behind the robot
 tf = (dist + ((vmax^2)/amax))/vmax;
-tdelay = 0.002;
+
+tdelay = -0.003;
 
 %PID control constants
 kp = 6; %proportional constant
-kd = 10; %derivative constant
-ki = 0.85; %integral constant
+kd = 6; %derivative constant
+ki = 2.3; %integral constant
 e_int = 0; %integral of error
 e_der = 0; %derivative of error
 e_pro = 0; %error 
@@ -45,29 +49,41 @@ while time < (tf)
     time = time + elapsedTime;
     
     uref = trapezoidalVelocityProfile(time, amax, vmax, dist, sign); %reference velocity
-  %  sref = trapezoidalDistanceProfile(time, amax, vmax, dist, sign); %reference distance
-   
-  %  udelay = trapezoidalVelocityProfile(time-tdelay, amax, vmax, dist, sign);
-    sdelay = trapezoidalDistanceProfile(time-tdelay, amax, vmax, dist, sign);
+    
+    sdelay = trapezoidalDistanceProfile((time-tdelay), amax, vmax, dist, sign);
     
     leftEncoder = robot.encoders.LatestMessage.Left; %adds travelled distance in mm
     signedDistance = double(double(leftEncoder - leftStart)/1000); %in m
     
-    error = double(signedDistance - sdelay);
-    e_pro = double(error/1000); %in m
-    e_int = double(e_int) + error/1000; %in m*s
-    e_der = double((error-errorArray(end))/1000/(time-timeArray(end))); %in m/s
-    upid = kp*e_pro + ki * e_int + kd * e_der;
+    upid = 0;
     
-    %uref - upid
-    robot.sendVelocity(uref - upid, uref - upid);
+    if(feedback)
+        error = double(sdelay - signedDistance);
+        e_pro = double(error/1000); %in m
+        e_int = double(e_int) + error/1000; %in m*s
+        e_der = double((error-errorArray(end))/1000/(time-timeArray(end))); %in m/s
+        upid = kp*e_pro + ki * e_int + kd * e_der;
+    end
+    ureal = uref + upid;
+    
+    if(ureal<=0)
+        ureal= 0;
+    end
+    if (ureal > 0.3)
+        ureal = 0.3;
+    end
+    robot.sendVelocity(ureal, ureal);
     
     timeArray(arrayIndex) = time; %total elapsed time so far
     distArray(arrayIndex) = signedDistance; %total travelled distance so far
  %   srefArray(arrayIndex) = sref; %plot uref? sref
+    urealArray(arrayIndex) = ureal;
     sDelayArray(arrayIndex) = sdelay;
     arrayIndex = arrayIndex + 1;
 end
+
+
+disp((max(distArray)-max(sDelayArray))*1000);
 
 robot.sendVelocity(0.0, 0.0);
 pause(1);
@@ -76,3 +92,4 @@ figure(1);
 plot(timeArray, distArray, timeArray, sDelayArray);
 figure(2);
 plot(timeArray, distArray - sDelayArray);
+disp(distArray(end) - sDelayArray(end));

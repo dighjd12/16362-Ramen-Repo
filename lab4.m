@@ -1,6 +1,6 @@
 %% dafdafsd
 
-robot = neato('exa');
+robot = neato('yotta');
 
 %%
 
@@ -10,11 +10,9 @@ clear all;
 
 feedback = true; %boolean deciding to add feedback factor
 
-%int_dist = 20;
 timeArray = zeros(1,1);
 distArray = zeros(1,1); % create 1x1 matrix with value 0
 urealArray = zeros(1,1);
-
 sDelayArray = zeros(1,1);
 errorArray = zeros(1,1);
 
@@ -62,12 +60,15 @@ while time < (tf)
         e_pro = double(error/1000); %in m
         e_int = double(e_int) + error/1000; %in m*s
         e_der = double((error-errorArray(end))/1000/(time-timeArray(end))); %in m/s
-        upid = kp*e_pro + ki * e_int + kd * e_der;
+        upid = kp*e_pro + ki*e_int + kd*e_der;
     end
     ureal = uref + upid;
     
-    if(uref==0 || uref<0)
+    if(ureal<=0)
         ureal= 0;
+    end
+    if(ureal>3)
+        ureal=3;
     end
     
     robot.sendVelocity(ureal, ureal);
