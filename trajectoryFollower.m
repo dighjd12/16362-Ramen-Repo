@@ -1,10 +1,12 @@
 classdef trajectoryFollower
     properties
         controller;
+        referenceControl;
     end
     methods(Static = true)
-        function obj = trajectoryFollower(controller)
+        function obj = trajectoryFollower(controller, referenceControl)
             obj.controller = controller;
+            obj.referenceControl = referenceControl;
         end
         function feedForward(feedback)
             %feedback = boolean deciding to add feedback factor
@@ -25,14 +27,12 @@ classdef trajectoryFollower
 
             time=0;
          
-            fig_ref = figure8ReferenceControl(0.4,0.4,0.5); 
-            %fig_ref = trapezoidalStepReferenceControl(.5,.75,.25,1, 1);
             ti = 0;
-            tf = fig_ref.getTrajectoryDuration(fig_ref);
+            tf = obj.referenceControl.getTrajectoryDuration(obj.referenceControl);
             dt = .01;
             s_o = 0;
             p_o = [0; 0];
-            robotTraj = robotTrajectory(ti, tf, dt, s_o, p_o, fig_ref);
+            robotTraj = robotTrajectory(ti, tf, dt, s_o, p_o, obj.referenceControl);
             rM = robotModel();
             
             elapsedTic = tic;

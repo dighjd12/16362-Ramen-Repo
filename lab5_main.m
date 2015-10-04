@@ -93,6 +93,15 @@ plot(xArray,yArray);
             plot(poseArray, pose2Array);
 
 
+%% call trajectory follower here
 
+ctrl = controller(0,0);
+
+
+%fig_ref = figure8ReferenceControl(0.4,0.4,0.5); 
+fig_ref = trapezoidalStepReferenceControl(.5,.75,.25,1, 1);
+
+trajFollower = trajectoryFollower(ctrl, fig_ref);
+trajFollower.feedForward(false);
 
 
