@@ -11,7 +11,7 @@ classdef trajectoryFollower
 
             %need this for data logs later?
             timeArray = zeros(1,1);
-            %distArray = zeros(1,1); % create 1x1 matrix with value 0
+            distArray = zeros(1,1); % create 1x1 matrix with value 0
             vrealArray = zeros(1,1);
             wrealArray = zeros(1,1);
             poseArray = zeros(1,1);
@@ -60,7 +60,9 @@ classdef trajectoryFollower
                 end
                 
                 pose = robotTraj.getPoseAtTime(robotTraj,time);
+               
                 pose = pose';
+               % robot.sendVelocity(vl, vr);
                 
                 v_real = v_t + v_control;
                 w_real = w_t + w_control;
@@ -70,21 +72,19 @@ classdef trajectoryFollower
                 robot.sendVelocity(vl, vr);
 
                 timeArray(arrayIndex) = time; %total elapsed time so far
-               % distArray(arrayIndex) = signedDistance; %total travelled distance so far
-                vrealArray(arrayIndex) = v_real;
-                wrealArray(arrayIndex) = w_real;
-                poseArray(arrayIndex) = pose(1); %x points
-                pose2Array(arrayIndex) = pose(2); %y points
+                distArray(arrayIndex) = signedDistance; %total travelled distance so far
+             
                 arrayIndex = arrayIndex + 1;
             end
 
             robot.sendVelocity(0.0, 0.0);
             pause(1);
 
-            %figure(1);
-            %plot(timeArray, vrealArray);
-            %figure(2);
-            %plot(timeArray, wrealArray);
+            figure(1);
+            plot(timeArray, distArray);
+          %  figure(2);
+          %  plot(timeArray, distArray - sDelayArray);
+
             
         end
     end

@@ -1,5 +1,5 @@
 %% integrate figure 8 trajectory
-fig_ref = figure8ReferenceControl(0.5,0.4,0.5);
+fig_ref = figure8ReferenceControl(0.4,0.4,0.5);
 dt = 0.1;
 t = 0;
 tf = fig_ref.getTrajectoryDuration(fig_ref);
@@ -27,11 +27,12 @@ plot(xArray,yArray);
 %feedback = boolean deciding to add feedback factor
 
             %need this for data logs later?
-            timeArray = zeros(1,1);
-            distArray = zeros(1,1); % create 1x1 matrix with value 0
-            vrealArray = zeros(1,1);
-            wrealArray = zeros(1,1);
+           timeArray = zeros(1,1);
+           distArray = zeros(1,1); % create 1x1 matrix with value 0
+           vrealArray = zeros(1,1);
+           wrealArray = zeros(1,1);
            poseArray = zeros(1,1);
+           pose2Array = zeros(1,1);
        
            % leftStart = double(robot.encoders.LatestMessage.Left);
            % leftEncoder = double(leftStart); % in "mm"
@@ -52,7 +53,7 @@ plot(xArray,yArray);
             rM = robotModel();
             
             elapsedTic = tic;
-            while time < (tf)
+            while time < tf
                 pause(0.001);
                 elapsedTime = toc(elapsedTic); %elapsedTime between this loop and the previous one
                 elapsedTic = tic;
@@ -69,7 +70,7 @@ plot(xArray,yArray);
                 w_real = w_t;
                 pose = robotTraj.getPoseAtTime(robotTraj,time);
                % [vl, vr] = rM.VwTovlvr(rM,v_real,w_real);
-
+                pose = pose';
                % robot.sendVelocity(vl, vr);
 
                 timeArray(arrayIndex) = time; %total elapsed time so far
@@ -77,6 +78,7 @@ plot(xArray,yArray);
                 vrealArray(arrayIndex) = v_real;
                 wrealArray(arrayIndex) = w_real;
                 poseArray(arrayIndex) = pose(1);
+                pose2Array(arrayIndex) = pose(2);
                 arrayIndex = arrayIndex + 1;
             end
 
@@ -87,6 +89,8 @@ plot(xArray,yArray);
             plot(timeArray, vrealArray);
             figure(2);
             plot(timeArray, wrealArray);
+            figure(3);
+            plot(poseArray, pose2Array);
 
 
 
