@@ -6,7 +6,7 @@ classdef controller
         function obj = controller(kx, ky)
             obj.constMatrix = [kx 0; 0 ky];
         end
-        function [V_control, w_control] = velFeedback(pose_robot, pose_ref, robot_yaw) 
+        function [V_control, w_control] = velFeedback(obj, pose_robot, pose_ref, robot_yaw) 
             %the poses 2x1 [x;y] are in world frame
             rotMatrix = [cos(robot_yaw) -sin(robot_yaw); sin(robot_yaw) cos(robot_yaw)];
             answer = obj.constMatrix*((rotMatrix^-1)*(pose_ref - pose_robot));
