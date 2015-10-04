@@ -8,7 +8,7 @@ classdef trajectoryFollower
             obj.controller = controller;
             obj.referenceControl = referenceControl;
         end
-        function feedForward(feedback)
+        function a = feedForward(robot, obj, feedback)
             %feedback = boolean deciding to add feedback factor
 
             %need this for data logs later?
@@ -81,6 +81,7 @@ classdef trajectoryFollower
             robot.sendVelocity(0.0, 0.0);
             pause(1);
 
+            a=1;
             %figure(1);
             %plot(timeArray, vrealArray);
             %figure(2);
