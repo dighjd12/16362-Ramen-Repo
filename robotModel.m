@@ -1,7 +1,7 @@
 classdef robotModel
     properties
-        W = 241.3;
-        W2 = 120.65;
+        W = 0.23495;
+        W2 = 0.12065;
     end
     methods(Static = true)
         function [V,w] = vlvrToVw(obj,vl,vr)

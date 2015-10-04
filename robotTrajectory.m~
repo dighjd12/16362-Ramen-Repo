@@ -12,7 +12,7 @@ classdef robotTrajectory
     end
     methods(Static = true)
         function obj = robotTrajectory(ti, tf, dt, s_o, p_o, referenceControl)
-            obj.numSamples = round((tf-ti)/dt);
+            obj.numSamples = (tf-ti)./dt;
             %tf should be within the duration of referenceControl
             %obj.pose(1) = cell(2,1);
             p_o = p_o';
@@ -41,8 +41,8 @@ classdef robotTrajectory
                 obj.y(i+1) = obj.y(i) + ds*sin(dth);
                 obj.time(i+1) = obj.time(i)+dt;
             end
-            obj.v(obj.numSamples) = 0;
-            obj.w(obj.numSamples) = 0;
+            obj.v(nu) = 0;
+            obj.w(n) = 0;
         
         end
         function pose_t = getPoseAtTime(obj,t)
