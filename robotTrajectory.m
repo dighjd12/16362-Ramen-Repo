@@ -10,7 +10,7 @@ classdef robotTrajectory
     end
     methods(Static = true)
         function obj = robotTrajectory(ti, tf, dt, s_o, p_o, referenceControl)
-             %??
+           
             obj.numSamples = (tf-ti)./dt;
             %tf should be within the duration of referenceControl
             obj.time(1) = ti;
@@ -21,7 +21,7 @@ classdef robotTrajectory
             %    s(theta)  c(theta) y
             %     0   0 1 ]
             obj.referenceControl = referenceControl;
-            %fig_ref = figure8ReferenceControl(0.5,0.4,0.5);
+            %fig_ref = figure8ReferenceControl(0.4,0.4,0.5);
 
             for i=1:n-1
                 [V_i,w_i] = referenceControl.computeControl(fig_ref, obj.time(i));

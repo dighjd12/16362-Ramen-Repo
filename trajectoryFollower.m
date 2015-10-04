@@ -7,7 +7,7 @@ classdef trajectoryFollower
             obj.controller = controller;
         end
         function feedForward()
-            %time thing********************** FIX THIS
+            
             feedback = true; %boolean deciding to add feedback factor
 
             %need this for data logs later?
@@ -23,15 +23,17 @@ classdef trajectoryFollower
             time=0;
          
             fig_ref = figure8ReferenceControl(0.5,0.4,0.5); 
+            %fig_ref = trapezoidalStepReferenceControl(.5,.75,.25,1, 1);
             ti = 0;
             tf = fig_ref.getTrajectoryDuration(fig_ref);
             dt = .01;
             robotTraj = robotTrajectory(ti, tf, dt, s_o, p_o, fig_ref);
+            rM = robotModel();
             
             while time < (tf)
-                elapsedTic = tic;
                 pause(0.001);
                 elapsedTime = toc(elapsedTic); %elapsedTime between this loop and the previous one
+                elapsedTic = tic;
                 time = time + elapsedTime;
 
                 v_t = robotTraj.getVelocityAtTime(robotTraj,time);
@@ -55,7 +57,7 @@ classdef trajectoryFollower
                 v_real = v_t + v_control;
                 w_real = w_t + w_control;
 
-                rM = robotModel();
+                
                 [vl, vr] = rM.VwTovlvr(rM,v_real,w_real);
 
                 robot.sendVelocity(vl, vr);
@@ -69,8 +71,8 @@ classdef trajectoryFollower
             robot.sendVelocity(0.0, 0.0);
             pause(1);
 
-          %  figure(1);
-          %  plot(timeArray, distArray, timeArray, sDelayArray);
+            figure(1);
+            plot(timeArray, distArray);
           %  figure(2);
           %  plot(timeArray, distArray - sDelayArray);
 
