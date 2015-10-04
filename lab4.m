@@ -90,3 +90,52 @@ figure(1);
 plot(timeArray, distArray, timeArray, sDelayArray);
 figure(2);
 plot(timeArray, distArray - sDelayArray);
+
+
+%%
+
+feedback = true; %boolean deciding to add feedback factor
+
+timeArray = zeros(1,1);
+distArray = zeros(1,1); % create 1x1 matrix with value 0
+urealArray = zeros(1,1);
+sDelayArray = zeros(1,1);
+errorArray = zeros(1,1);
+
+signedDistance =0;
+arrayIndex = 1; %index starts with 1
+
+time = 0;
+
+vmax = 0.25;
+amax = 3*0.25;
+dist = 1;
+sign = 1; %change this to a negative number if the goal is behind the robot
+tf = (dist + ((vmax^2)/amax))/vmax;
+
+tdelay = 0.003;
+
+
+
+while time < (tf)
+    elapsedTic = tic;
+    pause(0.001);
+    elapsedTime = toc(elapsedTic); %elapsedTime between this loop and the previous one
+    time = time + elapsedTime;
+    
+    uref = trapezoidalVelocityProfile(time, amax, vmax, dist, sign); %reference velocity
+    
+    sdelay = trapezoidalDistanceProfile((time-tdelay), amax, vmax, dist, sign);
+   
+    timeArray(arrayIndex) = time; %total elapsed time so far
+ %   srefArray(arrayIndex) = sref; %plot uref? sref
+  %  urealArray(arrayIndex) = ureal;
+    sDelayArray(arrayIndex) = sdelay;
+    arrayIndex = arrayIndex + 1;
+end
+
+figure(1);
+plot(timeArray, sDelayArray);
+%figure(2);
+%plot(timeArray, distArray - sDelayArray);
+
