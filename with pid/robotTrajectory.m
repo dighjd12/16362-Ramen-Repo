@@ -6,6 +6,7 @@ classdef robotTrajectory
         w;
         x;
         y;
+        th;
         dist;
         referenceControl;
     end
@@ -17,6 +18,7 @@ classdef robotTrajectory
             p_o = p_o';
             obj.x(1) = p_o(1);
             obj.y(1) = p_o(2);
+            obj.th(1) = p_o(3);%%************
             obj.time(1) = ti;
             obj.dist(1) = s_o;
             
@@ -29,8 +31,14 @@ classdef robotTrajectory
                 obj.dist(i+1) = obj.dist(i) + obj.v(i)*dt;
                 dth = obj.w(i)*dt;
                 ds = obj.v(i)*dt;
-                obj.x(i+1) = obj.x(i) + ds*cos(dth);
-                obj.y(i+1) = obj.y(i) + ds*sin(dth);
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                th_l = obj.th(i);
+                obj.x(i+1) = obj.x(i) + ds*cos(th_l);
+                obj.y(i+1) = obj.y(i) + ds*sin(th_l);
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
+                %obj.x(i+1) = obj.x(i) + ds*cos(dth);
+               % obj.y(i+1) = obj.y(i) + ds*sin(dth);
+                obj.th(i+1) = mod(obj.th(i) + dth, 360);%%************
                 obj.time(i+1) = obj.time(i)+dt;
             end
             obj.v(obj.numSamples) = 0;
@@ -44,6 +52,9 @@ classdef robotTrajectory
         end
         function vel_t = getVelocityAtTime(obj,t)
             vel_t = interp1(obj.time,obj.v,t);
+        end
+        function th_t = getYawAtTime(obj,t)%%************
+            th_t = interp1(obj.time,obj.th,t);
         end
         function dist_t = getDistanceAtTime(obj,t)
             dist_t = interp1(obj.time,obj.dist,t);

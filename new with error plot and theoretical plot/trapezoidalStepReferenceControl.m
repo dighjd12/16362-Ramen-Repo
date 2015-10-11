@@ -22,32 +22,28 @@ classdef trapezoidalStepReferenceControl
             end
         end
         function [V,w] = computeControl(obj,timeNow)
-        start_pause = timeNow <= obj.tPause && timeNow >= 0;
-        end_pause = timeNow>obj.tf && timeNow < (obj.tf+obj.tPause);
+        start_pause = timeNow <= obj.tPause;
+        end_pause = timeNow>(obj.tf+obj.tPause);
+        w = 0;
         if (start_pause || end_pause)
             V = 0;
-            
         else
-            
-            uref =0;
+            timeNow = timeNow - obj.tPause;
+            V =0;
 
-            if(t<tramp)
-                uref = amax*t;
+            if(timeNow<obj.tramp)
+                V = obj.amax*timeNow;
             end
 
-            if(tramp<t && t<(tf-tramp))
-                uref = vmax;
+            if(obj.tramp<timeNow && timeNow<(obj.tf-obj.tramp))
+                V = obj.vmax;
             end
 
-            if((tf-t)<tramp)
-                uref = (amax*(tf-t));
+            if((obj.tf-timeNow)<obj.tramp)
+                V = (obj.amax*(obj.tf-timeNow));
             end
 
-            uref = uref*signFactor;
-
-            if(t<0 || t>tf)
-                uref = 0;
-            end
+            V = V*obj.signFactor;
             
         end
         end

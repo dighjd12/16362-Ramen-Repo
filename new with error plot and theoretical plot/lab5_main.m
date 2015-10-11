@@ -16,12 +16,34 @@ while t < tf
     dist = V * dt;
     disp_y = dist * sin(th);
     disp_x = dist * cos(th);
-    xArray(index) = xArray(end) + disp_x;
-    yArray(index) = yArray(end) + disp_y;
+    xArray(index) = wxArray(end) + disp_x;
+    yArray(index) = wyArray(end) + disp_y;
     index = index + 1;
 end
 plot(xArray,yArray);
 
+
+
+%% integrate figure 8 trajectory mine
+fig_ref = figure8ReferenceControl(0.4,0.4,0.6);
+dt = 0.1;
+t = 0;
+tf = fig_ref.getTrajectoryDuration(fig_ref);
+xArray = zeros(1,1);
+yArray = zeros(1,1);
+thArray = zeros(1,1);
+index = 2;
+while t < tf
+    t = t + dt;
+    [V,w] = fig_ref.computeControl(fig_ref,t);
+    disp_th = double(w * dt);
+    thArray(index) = thArray(index-1) + disp_th;
+    th = thArray(index-1);
+    xArray(index) = xArray(index-1) + V*cos(th)*dt;
+    yArray(index) = yArray(index-1) + V*sin(th)*dt;
+    index = index + 1;
+end
+plot(xArray,yArray);
 %% feedforward testing
 
 %feedback = boolean deciding to add feedback factor
@@ -103,13 +125,14 @@ robot.close()
 clear all;
             
 %% call trajectory follower here
-
-ctrl = controller(0.2,0.2);
+close all;
+ctrl = controller(0.00003,0.00003);
 
 fig_ref = figure8ReferenceControl(0.4,0.4,0.5); 
 %fig_ref = trapezoidalStepReferenceControl(.5,.75,.25,1, 1);
 
 trajFollower = trajectoryFollower(ctrl, fig_ref);
-trajFollower.feedForward(robot, trajFollower, true);
+trajFollower.feedForward(robot, trajFollower, false);
+
 
 

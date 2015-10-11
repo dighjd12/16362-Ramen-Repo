@@ -22,17 +22,19 @@ classdef figure8ReferenceControl
          % should be executing at time timeNow. Any zero velocity
          % pauses specified in the constructor are implemented here
          % too.
-        start_pause = timeNow <= obj.tPause;
-        end_pause = timeNow>(obj.tf+obj.tPause);
-        if (start_pause || end_pause)
+        start_pause = (timeNow <= obj.tPause);
+        end_pause = timeNow > obj.tf+obj.tPause;
+       if (start_pause || end_pause)
             V = 0;
             w = 0;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         else
             t = timeNow-obj.tPause;
             ks = obj.Ks;
             kv = obj.Kv;
-            vr = double((0.3*kv + 0.14125*(kv/ks) * sin((t.*kv)./(2*ks))));
-            vl = double((0.3*kv - 0.14125*(kv/ks) * sin((t.*kv)./(2*ks))));
+            vr = double((0.3*kv + 0.14125*(kv/ks) * sin(double(t.*kv)./(2*ks))));
+            vl = double((0.3*kv - 0.14125*(kv/ks) * sin(double(t.*kv)./(2*ks))));
+           
             [V, w] = robotModel.vlvrToVw(robotModel,vl,vr);
         end
         end
