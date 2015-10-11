@@ -1,7 +1,7 @@
 %% roobot
 
 %********* 1
-robot = neato('exa');
+robot = neato('deca');
 %global timeArray;
 %global leftArray;
 %globa neatoEncoderFrame;
