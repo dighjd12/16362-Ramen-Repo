@@ -116,7 +116,7 @@ classdef trajectoryFollowerVerCubicSpiral
                               0              0             1];
                 
                 Htransform = Htransform*Hnext;
-                ref_p_world = pose.matToPoseVec(Htransform);
+                ref_ppose.matToPoseVec(Htransform);
                 
                 %update the data logger(just arrays)
                 vlRealArray(i) = real_vl;
