@@ -20,7 +20,7 @@ classdef controller
             w_control = control(2);
         end
         function initialize(obj, startState)
-           obj.lastState = startState;
+           obj.lastState = startState; % 3x1 pose
            obj.started = false; %initialize clock,derivative...??
         end
     end

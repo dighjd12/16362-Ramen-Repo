@@ -12,6 +12,8 @@ n=1;
 
 mrplSystem.executeTrajectory(robot,0.25,0.25,0.0,1,n);
 
+%%
+
 pause(3);
 
 n = 2;

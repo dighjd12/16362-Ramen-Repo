@@ -11,7 +11,10 @@ classdef mrplSystem
             curve = cubicSpiral.planTrajectory(x,y,th,sign);
             vmax=.25;
             planVelocities(curve, vmax); %fills in the v,w,vl,vr arrays
-            follower = trajectoryFollowerVerCubicSpiral(ctrl, curve);
+            follower = trajectoryFollowerVerCubicSpiral(ctrl);
+            
+            follower.loadTrajectory(follower, curve, follower.lastPose)
+            
             follower.feedForward(robot, follower,false,-0.003,tryNum);
             
             %just plot the reference trajectory
