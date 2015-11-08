@@ -23,10 +23,10 @@ classdef mrplSystem < handle
             lmLocalizer = lineMapLocalizer(lines_p1,lines_p2,gain,errThresh,gradThresh);
             obj.SE = stateEstimator(lmLocalizer, worldLineArray, lidarSkip);
         end
-        function [lpb,lpc] = executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign,lpa,lpd)
+        function [lpb] = executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign,lpa)
             %make sure table is there.
             
-            r = xfa - lpa;
+            r = [xfa;yfa;thfa] - lpa;
             
             curve = cubicSpiral.planTrajectory(r(1,1),r(2,1),r(3,1),sign);
             vmax=.25;

@@ -9,7 +9,7 @@ pause(5);
 
 robotPose = pose(0.5,0.5,pi()/2.0);
 
-[lpb1,lpc1] = mrpl.executeTrajectorySE(mrpl,robot,0.25,0.75,pi()/2.0,1,robotPose.getPoseVec(),robotPose);
+[lpb1] = mrpl.executeTrajectorySE(mrpl,robot,0.25,0.75,pi()/2.0,1,robotPose.getPoseVec());
 
 pause(1);
 

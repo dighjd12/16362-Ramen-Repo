@@ -22,12 +22,15 @@ classdef stateEstimator < handle
         function setInitPose(obj,initPose)
             obj.poseFused = initPose;
         end
-        function pf = fusePose(obj, dx, dy, dth)
+        function pf = fusePose(obj, robot, dx, dy, dth)
             
-            processOdometryData(obj, dx, dy, dth);
-            modelPts = processRangeImage();
+            obj.processOdometryData(obj, dx, dy, dth);
+            modelPts = obj.processRangeImage(obj, robot);
+            maxIters = 20;
             
-            [success, outPose] = refinePose(obj.lmLocalizer,obj.poseFused,modelPts,maxIters);
+            p = pose(obj.poseFused);
+            disp(obj.poseFused);
+            [success, outPose] = refinePose(obj.lmLocalizer,p,modelPts,maxIters);
     
             %fixing poseFused
             poseLidar = outPose;
@@ -57,7 +60,7 @@ classdef stateEstimator < handle
             
             obj.poseFused = obj.poseFused + [dx;dy;dth];
         end
-        function modelPts = processRangeImage(obj)
+        function modelPts = processRangeImage(obj, robot)
             ranges = transpose(double(robot.laser.LatestMessage.Ranges));
             
             rangePts = ranges(1:obj.lidarSkip:length(ranges));

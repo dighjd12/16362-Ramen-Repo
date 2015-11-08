@@ -144,9 +144,9 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 obj.vrRealArray(i) =  real_vr;
                 obj.realArray(i,3) = obj.realArray(i-1,3)+dth;
                 dx = double(V*cos(th)*dtime);
-                dy = doyble(V*sin(th)*dtime);
-                obj.realArray(i,1) = obj.xRealArray(i-1,1) + dx;
-                obj.realArray(i,2) = obj.yRealArray(i-1,2) + dy;
+                dy = double(V*sin(th)*dtime);
+                obj.realArray(i,1) = obj.realArray(i-1,1) + dx;
+                obj.realArray(i,2) = obj.realArray(i-1,2) + dy;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 result1 = rsTowMatrix * [obj.realArray(i,1);obj.realArray(i,2);1];
                 result2 = fsTowMatrix * [obj.refArray(i,1) ;obj.refArray(i,2) ;1];
@@ -164,9 +164,9 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 robot_x  = obj.realArray(i,1);
                 robot_y  = obj.realArray(i,2);
                 
-                robot_x  = robot_pose(1);
-                robot_y  = robot_pose(2);
-                robot_th = robot_pose(3);
+             %   robot_x  = robot_pose(1);
+             %   robot_y  = robot_pose(2);
+             %   robot_th = robot_pose(3);
                 
                 %the matrix that transform vector from robot frame to world
                 %frame
@@ -177,7 +177,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 result = rsTowMatrix * RtoSMatrix * [dx;dy;1];
                 
                 % robot_pose : fused_pose
-                robot_pose = obj.SE.fusePose(result(1),result(2),dth);
+                robot_pose = obj.SE.fusePose(obj.SE, robot, result(1),result(2),dth);
                           
                           
                 StoRMatrix = RtoSMatrix^-1; %inverse it we have world to robot
