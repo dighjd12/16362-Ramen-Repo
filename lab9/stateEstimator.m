@@ -22,7 +22,7 @@ classdef stateEstimator < handle
         function setInitPose(obj,initPose)
             obj.poseFused = initPose;
         end
-        function fusePose(obj, dx, dy, dth)
+        function pf = fusePose(obj, dx, dy, dth)
             
             processOdometryData(obj, dx, dy, dth);
             modelPts = processRangeImage();
@@ -37,7 +37,7 @@ classdef stateEstimator < handle
             th1 = obj.poseFused(3,1);
             obj.poseFused(3,1) = obj.poseFused(3,1) + obj.k*(atan2(sin(th2-th1),cos(th2-th1)));
 
-            
+            pf = obj.poseFused;
             %%%%%%%%%%%%%%%%%%%%%%%%%%plotting below 
 %             worldLidarPts = robotModel.senToWorld(obj.poseFused)*modelPts;
 %             bodyPts1 = bToA(obj.poseFused)*robotModel.bodyGraph();
@@ -50,7 +50,7 @@ classdef stateEstimator < handle
 %             plot(worldLidarPts(1,:), worldLidarPts(2,:), '-xr'); %plot lidar points in sensor frame
 %             hold off
 %             %%%%%%%%%plotting%%%%%%%%%%
-            pause(0.001);
+         %   pause(0.001);
         end
         
         function processOdometryData(obj, dx, dy, dth)

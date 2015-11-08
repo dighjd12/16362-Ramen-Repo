@@ -31,7 +31,7 @@ classdef mrplSystem < handle
             obj.follower.lastPoser = lpa;
             obj.follower.lastPosef = lpd;
             
-            obj.SE.setInitPose(obj.follower.lastPoser); %******** give initial pose?
+            obj.SE.setInitPose(obj.follower.lastPoser);
             
             [lpb,lpc] = obj.follower.feedForwardSE(robot, obj.follower, obj.SE, true, 0.501);
             
