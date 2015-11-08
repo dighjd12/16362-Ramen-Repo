@@ -1,5 +1,26 @@
 %% challenge task
 
+mrpl = mrplSystem();
+
+robotPose = pose()
+
+[lpb,lpc] = executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign,lpa,lpd);
+
+pause(1);
+
+[lpb,lpc] = executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign,lpa,lpd);
+pause(1);
+
+[lpb,lpc] = executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign,lpa,lpd);
+pause(1);
+
+
+%%
+
+mrpl = mrplSystem();
+
+[lp1a,lp1b] = mrpl.executeTrajectory(mrpl,robot,0.25,0.25,0.0,1,[0;0;0],[0,0,0]);
+
 gain = 0.01;
 errThresh = 0.001;
 gradThresh = 0.0005;
@@ -7,8 +28,8 @@ vGain = 1.0;
 
 lines_p1 = [[0;0], [0;4]];
 lines_p2 = [[4;0], [0;0]];
-walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
-maxIters = 20;
+walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]]; %%
+maxIters = 20; %%
 initMaxIters = 50;
 
 poseInit = pose(15*0.0254, 9*0.0254, pi()/2.0); % initial pose, given by the odometry
@@ -19,11 +40,10 @@ poseLidar = [0;0;0];
 lmLocalizer = lineMapLocalizer(lines_p1,lines_p2,gain,errThresh,gradThresh);
 
 fig = gcf;
-%driver = robotKeypressDriver(fig);
 
-xRealArray = zeros(1,1);
-yRealArray = zeros(1,1);
-thRealArray = zeros(1,1);
+xRealArray = poseInit(1,1);
+yRealArray = poseInit(2,1);
+thRealArray = poseInit(3,1);
 
 % read the value from the encoder
 %encoder reads distance in mm, to get in m, divide by 1000
@@ -36,15 +56,15 @@ rightNow = double(rightLast);
 lds = 0;
 rds = 0;
 
-i=1;
+i=2;
 
 duration = 60;
 time = 0;
 tic;
 while(time<duration)
     
+    %%%%%%%%%%%%%%%%%%%%%processOdometryData
     %update odometry pose
-    
     leftNow = double(double(robot.encoders.LatestMessage.Left)/1000); 
     lds = double(leftNow - leftLast);
     leftLast = double(leftNow);
@@ -53,10 +73,6 @@ while(time<duration)
     rds = double(rightNow - rightLast); 
     rightLast = double(rightNow);
     
-    obj.thRealArray(i) = obj.thRealArray(i-1)+dth;
-    obj.xRealArray(i) = obj.xRealArray(i-1) + double(V*cos(th)*dtime);
-    obj.yRealArray(i) = obj.yRealArray(i-1) + double(V*sin(th)*dtime);
-    
     real_vl = double(double(lds)/dtime); 
     real_vr = double(double(rds)/dtime);
     [V,w] = robotModel.vlvrToVw(real_vl,real_vr);
@@ -64,19 +80,24 @@ while(time<duration)
     %last angle the robot is pointing
     th = obj.thRealArray(i-1);
     
+    obj.thRealArray(i) = obj.thRealArray(i-1)+dth;
+    obj.xRealArray(i) = obj.xRealArray(i-1) + double(V*cos(th)*dtime);
+    obj.yRealArray(i) = obj.yRealArray(i-1) + double(V*sin(th)*dtime);
+    
     robot_th = thRealArray(i);
     robot_x = xRealArray(i);
     robot_y = yRealArray(i);
-    robot_pose = [robot_x ;robot_y ;robot_th];
+    robot_pose = [robot_x ;robot_y ;robot_th]; %from encoder
     
-    i = i+1;
+    poseFused = robot_pose;
     
-   % disp('oldPose');
-   % disp(poseInit.getPoseVec());
-    
-    elapsedtime = toc;
+    dtime = toc;
     tic;
-    time = time + elapsedtime;
+    time = time + dtime;
+    
+    
+    
+    %%%%%%%%%%%%%%%%%%processRangeImage
     ranges = transpose(double(robot.laser.LatestMessage.Ranges));
     %use every 10th range reading for points
     rangePts = ranges(1:10:length(ranges));
@@ -91,8 +112,11 @@ while(time<duration)
     end
     
     modelPts = [xPoints; yPoints; ones(1,length(xPoints))];
-    [success, outPose] = refinePose(lmLocalizer,poseFused,modelPts,maxIters);
     
+    
+    %%%%%%%%%%%%%%%%%%%%pose fusion based on processed odometry data and
+    %%%%%%%%%%%%%%%%%%%%range image
+    [success, outPose] = refinePose(lmLocalizer,poseFused,modelPts,maxIters);
     
     %fixing poseFused
     poseLidar = outPose;
@@ -102,17 +126,22 @@ while(time<duration)
     th1 = poseFused(3,1);
     poseFused(3,1) = poseFused(3,1) + k*(atan2(sin(th2-th1),cos(th2-th1)));
     
+    %setpose
+    %??????
+    
+    %%%%%%%%%%%%%%%%%%%%%% part of processOdometryData
+    obj.thRealArray(i) = poseFused(1,1);
+    obj.xRealArray(i) = poseFused(2,1);
+    obj.yRealArray(i) = poseFused(3,1);
+    i = i+1;
     
     %disp(poseInit.getPoseVec());
-    worldLidarPts = robotModel.senToWorld(poseFused)*modelPts;
-  
-    %disp('newPose');
-   % disp(poseInit.getPoseVec());
     
-    %robot
-    %bodyPts = ;
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%plotting below 
+    worldLidarPts = robotModel.senToWorld(poseFused)*modelPts;
     bodyPts1 = bToA(poseFused)*robotModel.bodyGraph();
-    %robotKeypressDriver.drive(robot,vGain);
     
     %%%%%%%%%plotting%%%%%%%%%%
     figure(1)

@@ -1,6 +1,30 @@
 %% challenge task
 
 mrpl = mrplSystem();
+robot = neato('zetta');
+robot.startLaser();
+pause(5);
+
+%% challenge task
+
+robotPose = pose(0.5,0.5,pi()/2.0);
+
+[lpb1,lpc1] = mrpl.executeTrajectorySE(mrpl,robot,0.25,0.75,pi()/2.0,1,robotPose.getPoseVec(),robotPose);
+
+pause(1);
+
+%%
+
+[lpb2,lpc2] = executeTrajectorySE(mrpl,robot,0.75,0.25,0.0,1,lpb1,lpd);
+pause(1);
+
+executeTrajectorySE(mrpl,robot,0.5,0.5,pi()/2.0,1,lpb2,lpd);
+pause(1);
+
+
+%%
+
+mrpl = mrplSystem();
 
 [lp1a,lp1b] = mrpl.executeTrajectory(mrpl,robot,0.25,0.25,0.0,1,[0;0;0],[0,0,0]);
 

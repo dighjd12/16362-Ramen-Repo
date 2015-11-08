@@ -8,8 +8,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
         vRealArray;
         wRealArray;
         vlRealArray;
-        vrRealArray;
-        vRealArray;     % [vl, vr] real speeds    at time t
+        vrRealArray;     % [vl, vr] real speeds    at time t
         realArray;      % x, y, th position/angle at time t
         errorArray;     % x, y, th error from ref at time t
         errorSizeArray; % length of error vector  at time t

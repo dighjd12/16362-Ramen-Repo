@@ -9,10 +9,12 @@ classdef mrplSystem < handle
     
     methods(Static=true)
         function obj = mrplSystem()
-            %obj.ctrl = controller(0.018,0.0000175,2e-2);
-            %obj.ctrl = controller(0.05,0.00005,0.05);
             obj.ctrl = controller(0.05,0.00001,0.05);
-            obj.follower = trajectoryFollowerVerCubicSpiral(obj.ctrl);
+            lines_p1 = [[0;0], [0;4]];
+            lines_p2 = [[4;0], [0;0]];
+            walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
+            mrplSystem.addStateEstimator(obj, 10, lines_p1, lines_p2, walls);
+            obj.follower = trajectoryFollowerVerCubicSpiral(obj.ctrl, obj.SE);
         end
         function addStateEstimator(obj, lidarSkip, lines_p1, lines_p2, worldLineArray)
             gain = 0.01;
@@ -23,17 +25,22 @@ classdef mrplSystem < handle
         end
         function [lpb,lpc] = executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign,lpa,lpd)
             %make sure table is there.
-            curve = cubicSpiral.planTrajectory(xfa,yfa,thfa,sign);
+            
+            r = xfa - lpa;
+            
+            curve = cubicSpiral.planTrajectory(r(1,1),r(2,1),r(3,1),sign);
             vmax=.25;
             planVelocities(curve, vmax);
             obj.follower.trajectory = curve;
             obj.follower.startPose = obj.follower.lastPoser;
             obj.follower.lastPoser = lpa;
-            obj.follower.lastPosef = lpd;
+           % obj.follower.lastPosef = lpd;
             
-            obj.SE.setInitPose(obj.follower.lastPoser);
+            obj.SE.setInitPose(obj.SE, obj.follower.lastPoser);
             
-            [lpb,lpc] = obj.follower.feedForwardSE(robot, obj.follower, obj.SE, true, 0.501);
+            obj.follower.feedForward(robot, obj.follower, true, 0.501);
+            lpb = obj.follower.lastPoser;
+            
             
         end
         function [lpb,lpc] = executeTrajectory(obj,robot,x,y,th,sign,lpa,lpd) %"main method"
