@@ -11,8 +11,8 @@ vGain = 1.0;
 
 lines_p1 = [[0;0], [0;4]];
 lines_p2 = [[4;0], [0;0]];
-walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
-maxIters = 20;
+walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]]; %%
+maxIters = 20; %%
 initMaxIters = 50;
 
 poseInit = pose(15*0.0254, 9*0.0254, pi()/2.0); % initial pose, given by the odometry

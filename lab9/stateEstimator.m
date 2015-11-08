@@ -1,143 +1,76 @@
 classdef stateEstimator < handle
     
     properties(Access = public)
-        gain;
-        errThresh;
-        gradThresh;
-        lines_p1;
-        lines_p2;
-        walls;
-        maxIters;
+    
+        lmLocalizer;
+        worldLineArray;
+        lidarSkip;
         
-        xRealArray;
-        yRealArray;
-        thRealArray;
+        poseFused;
+        k;
     end
     
     methods(Static = true)
-        function obj = stateEstimator(gain, errThresh, gradThresh)
-            obj.gain = 0.01;
-            obj.errThresh = 0.001;
-            obj.gradThresh = 0.0005;
-            obj.lines_p1 = [[0;0], [0;4]];
-            obj.lines_p2 = [[4;0], [0;0]];
-            obj.walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
-            obj.maxIters= 20;
+        function obj = stateEstimator(lmLocalizer, worldLineArray, lidarSkip)
             
-            obj.xRealArray = poseInit(1,1);
-            obj.yRealArray = poseInit(2,1);
-            obj.thRealArray = poseInit(3,1);
+            obj.lmLocalizer = lmLocalizer;
+            obj.worldLineArray = worldLineArray;
+            obj.lidarSkip = lidarSkip;
+            
+            obj.k = 0.25;
         end
-        function doStuff()
+        function setInitPose(obj,initPose)
+            obj.poseFused = initPose;
+        end
+        function fusePose(obj, dx, dy, dth)
+            
+            processOdometryData(obj, dx, dy, dth);
+            modelPts = processRangeImage();
+            
+            [success, outPose] = refinePose(obj.lmLocalizer,obj.poseFused,modelPts,maxIters);
+    
+            %fixing poseFused
+            poseLidar = outPose;
+            obj.poseFused(1,1) = obj.poseFused(1,1) + obj.k*(poseLidar(1,1)-obj.poseFused(1,1)); %change x
+            obj.poseFused(2,1) = obj.poseFused(2,1) + obj.k*(poseLidar(2,1)-obj.poseFused(2,1)); %change y
+            th2 = poseLidar(3,1);
+            th1 = obj.poseFused(3,1);
+            obj.poseFused(3,1) = obj.poseFused(3,1) + obj.k*(atan2(sin(th2-th1),cos(th2-th1)));
 
-            poseInit = pose(15*0.0254, 9*0.0254, pi()/2.0); % initial pose, given by the odometry
-            k = 0.25;
-            poseFused = poseInit;
-            poseLidar = [0;0;0];
-
-            lmLocalizer = lineMapLocalizer(lines_p1,lines_p2,gain,errThresh,gradThresh);
-
-
-            % read the value from the encoder
-            %encoder reads distance in mm, to get in m, divide by 1000
-            leftLast = double(double(robot.encoders.LatestMessage.Left)/1000);
-            leftNow = double(leftLast); 
-            rightLast = double(double(robot.encoders.LatestMessage.Right)/1000);
-            rightNow = double(rightLast);
-
-            % distance the left and right wheels traveled in dt
-            lds = 0;
-            rds = 0;
-
-            i=2;
-
-            duration = 60;
-            time = 0;
-            tic;
-            while(time<duration)
-
-                %update odometry pose
-                leftNow = double(double(robot.encoders.LatestMessage.Left)/1000); 
-                lds = double(leftNow - leftLast);
-                leftLast = double(leftNow);
-
-                rightNow = double(double(robot.encoders.LatestMessage.Right)/1000);
-                rds = double(rightNow - rightLast); 
-                rightLast = double(rightNow);
-
-                real_vl = double(double(lds)/dtime); 
-                real_vr = double(double(rds)/dtime);
-                [V,w] = robotModel.vlvrToVw(real_vl,real_vr);
-                dth = w*dtime;
-                %last angle the robot is pointing
-                th = obj.thRealArray(i-1);
-
-                obj.thRealArray(i) = obj.thRealArray(i-1)+dth;
-                obj.xRealArray(i) = obj.xRealArray(i-1) + double(V*cos(th)*dtime);
-                obj.yRealArray(i) = obj.yRealArray(i-1) + double(V*sin(th)*dtime);
-
-                robot_th = thRealArray(i);
-                robot_x = xRealArray(i);
-                robot_y = yRealArray(i);
-                robot_pose = [robot_x ;robot_y ;robot_th]; %from encoder
-
-                poseFused = robot_pose;
-
-                dtime = toc;
-                tic;
-                time = time + dtime;
-                ranges = transpose(double(robot.laser.LatestMessage.Ranges));
-                %use every 10th range reading for points
-                rangePts = ranges(1:10:length(ranges));
-                xPoints = zeros(1,length(rangePts));
-                yPoints = zeros(1,length(rangePts));
-                j=1;
-                for n=1:length(rangePts)
-                    xPoints(n) = cosd(j)*rangePts(n);
-                    yPoints(n) = sind(j)*rangePts(n);
-                   % fprintf('i: %d, point: %d\n', i, rangePts(n));
-                    j = j+10;
-                end
-
-                modelPts = [xPoints; yPoints; ones(1,length(xPoints))];
-                [success, outPose] = refinePose(lmLocalizer,poseFused,modelPts,maxIters);
-
-                %fixing poseFused
-                poseLidar = outPose;
-                poseFused(1,1) = poseFused(1,1) + k*(poseLidar(1,1)-poseFused(1,1)); %change x
-                poseFused(2,1) = poseFused(2,1) + k*(poseLidar(2,1)-poseFused(2,1)); %change y
-                th2 = poseLidar(3,1);
-                th1 = poseFused(3,1);
-                poseFused(3,1) = poseFused(3,1) + k*(atan2(sin(th2-th1),cos(th2-th1)));
-
-                %setpose
-                %??????
-
-                obj.thRealArray(i) = poseFused(1,1);
-                obj.xRealArray(i) = poseFused(2,1);
-                obj.yRealArray(i) = poseFused(3,1);
-                i = i+1;
-
-                %disp(poseInit.getPoseVec());
-                worldLidarPts = robotModel.senToWorld(poseFused)*modelPts;
-                bodyPts1 = bToA(poseFused)*robotModel.bodyGraph();
-
-                %%%%%%%%%plotting%%%%%%%%%%
-                figure(1)
-                plot(walls(1,:), walls(2,:), '-b'); %plot walls
-                hold on
-                plot(bodyPts1(1,:),bodyPts1(2,:),'-g'); %robotPoints
-                plot(worldLidarPts(1,:), worldLidarPts(2,:), '-xr'); %plot lidar points in sensor frame
-                hold off
-                %%%%%%%%%plotting%%%%%%%%%%
-                pause(0.001);
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%plotting below 
+%             worldLidarPts = robotModel.senToWorld(obj.poseFused)*modelPts;
+%             bodyPts1 = bToA(obj.poseFused)*robotModel.bodyGraph();
+% 
+%             %%%%%%%%%plotting%%%%%%%%%%
+%             figure(1)
+%             plot(obj.worldLineArray(1,:), obj.worldLineArray(2,:), '-b'); %plot walls
+%             hold on
+%             plot(bodyPts1(1,:),bodyPts1(2,:),'-g'); %robotPoints
+%             plot(worldLidarPts(1,:), worldLidarPts(2,:), '-xr'); %plot lidar points in sensor frame
+%             hold off
+%             %%%%%%%%%plotting%%%%%%%%%%
+            pause(0.001);
         end
         
-        function processOdometryData()
+        function processOdometryData(obj, dx, dy, dth)
             
+            obj.poseFused = obj.poseFused + [dx;dy;dth];
         end
-        function processRangeImage()
+        function modelPts = processRangeImage(obj)
+            ranges = transpose(double(robot.laser.LatestMessage.Ranges));
             
+            rangePts = ranges(1:obj.lidarSkip:length(ranges));
+            xPoints = zeros(1,length(rangePts));
+            yPoints = zeros(1,length(rangePts));
+            j=1;
+            for n=1:length(rangePts)
+                xPoints(n) = cosd(j)*rangePts(n);
+                yPoints(n) = sind(j)*rangePts(n);
+                j = j+obj.lidarSkip;
+            end
+
+            modelPts = [xPoints; yPoints; ones(1,length(xPoints))];
         end
         
     end
