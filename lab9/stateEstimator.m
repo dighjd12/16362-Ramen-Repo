@@ -23,23 +23,27 @@ classdef stateEstimator < handle
             obj.poseFused = initPose;
         end
         function pf = fusePose(obj, robot, dx, dy, dth)
-            
             obj.processOdometryData(obj, dx, dy, dth);
             modelPts = obj.processRangeImage(obj, robot);
             maxIters = 20;
             
             p = pose(obj.poseFused);
             disp(obj.poseFused);
+            disp(modelPts);
             [success, outPose] = refinePose(obj.lmLocalizer,p,modelPts,maxIters);
     
+            if(success)
+                disp('success')
+            end
+            
             %fixing poseFused
-            poseLidar = outPose;
+            poseLidar = outPose.getPoseVec();
             obj.poseFused(1,1) = obj.poseFused(1,1) + obj.k*(poseLidar(1,1)-obj.poseFused(1,1)); %change x
             obj.poseFused(2,1) = obj.poseFused(2,1) + obj.k*(poseLidar(2,1)-obj.poseFused(2,1)); %change y
             th2 = poseLidar(3,1);
             th1 = obj.poseFused(3,1);
             obj.poseFused(3,1) = obj.poseFused(3,1) + obj.k*(atan2(sin(th2-th1),cos(th2-th1)));
-
+            
             pf = obj.poseFused;
             %%%%%%%%%%%%%%%%%%%%%%%%%%plotting below 
 %             worldLidarPts = robotModel.senToWorld(obj.poseFused)*modelPts;

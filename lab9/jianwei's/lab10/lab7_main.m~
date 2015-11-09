@@ -1,0 +1,42 @@
+%% start robot  
+robot = neato('sim'); 
+%% c
+robot.close();
+robot.shutdown();
+clear all;
+close all;
+
+clc;
+%% call mrpl system
+
+close all;
+mrpl = mrplSystem();
+pose1 = [0.25;0.75;pi/2];
+pose2 = [0.75;0.25;0];
+pose3 = [0.5;0.5;pi/2];
+startPose = [0.5;0.5;pi/2];
+mat = [cos(startPose(3)), -sin(startPose(3)), startPose(1);
+       sin(startPose(3)),  cos(startPose(3)), startPose(2);
+       0                ,  0                , 1          ];
+r1 = mat*[pose1(1);pose1(2);1];
+r2 = mat*[pose2(1);pose2(2);1];
+r3 = mat*[pose3(1);pose3(2);1];
+th1 = atan2(sin(startPose(3) + pose1(3)),cos(startPose(3)+pose1(3)));
+th2 = atan2(sin(startPose(3) + pose2(3)),cos(startPose(3)+pose2(3)));
+th3 = atan2(sin(startPose(3) + pose3(3)),cos(startPose(3)+pose3(3)));
+pose1 = [r1(1);r1(2);th1];
+pose2 = [r1(1);r1(2);th1];
+pose1 = [r1(1);r1(2);th1];
+   
+
+
+mrpl.executeTrajectory(mrpl,robot,pose1(1),pose1(2),pose1(3),1);
+
+pause(1);
+
+mrpl.executeTrajectory(mrpl,robot,pose2(1),pose2(2),pose2(3),1)%-pi()/2.0,1);
+pause(1);
+
+mrpl.executeTrajectory(mrpl,robot,pose3(1),pose3(2),pose3(3),1);
+
+%pause(1);

@@ -22,13 +22,10 @@ classdef stateEstimator < handle
         function setInitPose(obj,initPose)
             obj.poseFused = initPose;
         end
-        function pf = fusePose(obj, robot, dx, dy, dth)
+        function fusePose(obj, dx, dy, dth)
             
-            obj.processOdometryData(obj, dx, dy, dth);
-            modelPts = obj.processRangeImage(obj, robot);
-            maxIters = 20;
-            
-            p = pose(poseFused);
+            processOdometryData(obj, dx, dy, dth);
+            modelPts = processRangeImage();
             
             [success, outPose] = refinePose(obj.lmLocalizer,obj.poseFused,modelPts,maxIters);
     
@@ -40,7 +37,7 @@ classdef stateEstimator < handle
             th1 = obj.poseFused(3,1);
             obj.poseFused(3,1) = obj.poseFused(3,1) + obj.k*(atan2(sin(th2-th1),cos(th2-th1)));
 
-            pf = obj.poseFused;
+            
             %%%%%%%%%%%%%%%%%%%%%%%%%%plotting below 
 %             worldLidarPts = robotModel.senToWorld(obj.poseFused)*modelPts;
 %             bodyPts1 = bToA(obj.poseFused)*robotModel.bodyGraph();
@@ -53,14 +50,14 @@ classdef stateEstimator < handle
 %             plot(worldLidarPts(1,:), worldLidarPts(2,:), '-xr'); %plot lidar points in sensor frame
 %             hold off
 %             %%%%%%%%%plotting%%%%%%%%%%
-         %   pause(0.001);
+            pause(0.001);
         end
         
         function processOdometryData(obj, dx, dy, dth)
             
             obj.poseFused = obj.poseFused + [dx;dy;dth];
         end
-        function modelPts = processRangeImage(obj, robot)
+        function modelPts = processRangeImage(obj)
             ranges = transpose(double(robot.laser.LatestMessage.Ranges));
             
             rangePts = ranges(1:obj.lidarSkip:length(ranges));
