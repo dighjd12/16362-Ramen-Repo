@@ -80,15 +80,13 @@ pose3 = [0.5;0.5;pi/2]; % final destination in world frame
 
 mrpl.setInitialPose(mrpl,startPose);
 
-mrpl.executeTrajectory(mrpl,robot,pose1(1),pose1(2),pose1(3),1);
+mrpl.executeTrajectorySE(mrpl,robot,pose1(1),pose1(2),pose1(3),1);
 
-
-%%
 pause(2);
 
-mrpl.executeTrajectory(mrpl,robot,pose2(1),pose2(2),pose2(3),1)%-pi()/2.0,1);
+mrpl.executeTrajectorySE(mrpl,robot,pose2(1),pose2(2),pose2(3),1)%-pi()/2.0,1);
 pause(2);
 %disp('3');
-mrpl.executeTrajectory(mrpl,robot,pose3(1),pose3(2),pose3(3),1);
+mrpl.executeTrajectorySE(mrpl,robot,pose3(1),pose3(2),pose3(3),1);
 
 %pause(1);
