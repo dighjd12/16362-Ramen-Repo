@@ -96,7 +96,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
         % Returns:      
         %   none
         % Last Edit:    11/09/2015       
-        function feedForward(robot, obj, feedback, delay)
+        function feedForward(robot, obj, feedback, delay)%,origin)
             
             %time to set up the things for robot to move
             
@@ -114,10 +114,18 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             i = 2; %index starts with 2 (because we know the init state of the robot)
 
             time= 0;% our clock
+            obj.xpRealArray(1) = zeros(1,1);
+            obj.ypRealArray(1) = zeros(1,1);
+            obj.xpRefArray(1)  = zeros(1,1);
+            obj.ypRefArray(1)  = zeros(1,1);
+            
             obj.xpRealArray(1) = obj.lastPoser(1);
             obj.ypRealArray(1) = obj.lastPoser(2);
             obj.xpRefArray(1)  = obj.lastPosef(1);
             obj.ypRefArray(1)  = obj.lastPosef(2);
+            
+            obj.realArray(3) = obj.lastPoser(3); %start bearing
+            
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             rsTowMatrix = [cos(obj.lastPoser(3)), -sin(obj.lastPoser(3)), obj.lastPoser(1);
@@ -200,16 +208,22 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 RtoSMatrix = [cos(robot_th) -sin(robot_th) robot_x;
                               sin(robot_th)  cos(robot_th) robot_y;
                               0              0             1];
+                %FtoWMatrix = [cos(origin(3)) -sin(origin(3)) origin(1);
+                %              sin(origin(3))  cos(origin(3)) origin(2);
+                %              0              0             1];
+                
+                cB = obj.realArray(i,3); %current bearing of the robot
+                Rzth = [cos(cB) -sin(cB) 0 0; ...
+                        sin(cB) cos(cB) 0 0;
+                        0 0 1 0;
+                        0 0 0 1];
                           
-                result = rsTowMatrix * RtoSMatrix * [dx;dy;1];
-
-                disp(result(1));
-                disp(result(2));
+                result = Rzth * [dx;dy;0;1];
                 
                 % robot_pose : fused_pose
-                robot_pose = obj.SE.fusePose(obj.SE, robot, dx,dy,dth);
-                
+                robot_pose = obj.SE.fusePose(obj.SE, robot, result(1,1),result(2,1),dth);
                           
+                %robot_pose = [robot_x;robot_y;robot_th];       
                 StoRMatrix = RtoSMatrix^-1; %inverse it we have world to robot
                 % ref_x - real_x and ref_y - real_y we have our error
                 % vector
@@ -225,6 +239,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
 
                 if(feedback)
                     %get two control parameter from the controller
+                    obj.controller.started = true;
                    [v_control, w_control] =...
                         obj.controller.velFeedback(obj.controller...
                        ,obj.errorArray(:,1)...
@@ -277,12 +292,13 @@ classdef trajectoryFollowerVerCubicSpiral < handle
               
             obj.lastPoser = [obj.xpRealArray(end);
                              obj.ypRealArray(end);
-                             obj.thRealArray(end)];
+                             obj.realArray(3,end)];
         
             obj.lastPosef = [obj.xpRefArray(end);
                              obj.ypRefArray(end);
-                             obj.thRefArray(end)];
+                             obj.refArray(3,end)];
     
+            disp('end of trajectory');
         end
     end
 end
