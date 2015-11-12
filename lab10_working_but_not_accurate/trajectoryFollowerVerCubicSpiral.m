@@ -295,6 +295,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             plot(obj.xpRefArray,obj.ypRefArray,'-b');
             plot(obj.xpRealArray,obj.ypRealArray,'-r');
             title('reference traj and real traj');
+            legend('Reference', 'Real');
             hold off
             fprintf('last pose in real traj is (%d %d %d)\n', obj.xpRealArray(end),...
             obj.ypRealArray(end),obj.thpRealArray(end));

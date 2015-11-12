@@ -17,10 +17,10 @@ robot.stopLaser();
 gain = 0.01;
 errThresh = 0.001;
 gradThresh = 0.0005;
-lines_p1 = [[0;0], [0;4]];
-lines_p2 = [[4;0], [0;0]];
+lines_p1 = [[0;0], [0;1.3]];
+lines_p2 = [[1.3;0], [0;0]];
 robotPose = pose(0.5, 0.5, pi/2);
-walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
+walls = [[1.3; 0.0], [0.0; 0.0], [0.0; 1.3]];
 maxIters = 100;
 lmLocalizer = lineMapLocalizer(lines_p1,lines_p2,gain,errThresh,gradThresh);
 robot.startLaser();
@@ -63,18 +63,20 @@ mrpl = mrplSystem();
 pose1 = [0.25;0.75;pi/2]; % first destination in world frame
 pose2 = [0.75;0.25;0]; % second destination in world frame
 pose3 = [0.5;0.5;pi/2]; % final destination in world frame
+
+figure(2);
+
 startPose = startPose.poseVec;
 
 mrpl.setInitialPose(mrpl,startPose);
 
 mrpl.executeTrajectorySE(mrpl,robot,pose1(1),pose1(2),pose1(3),1);
-
 pause(2);
 
 
 mrpl.executeTrajectorySE(mrpl,robot,pose2(1),pose2(2),pose2(3),1);
-
 pause(2);
+
 mrpl.executeTrajectorySE(mrpl,robot,pose3(1),pose3(2),pose3(3),1);
 
 %pause(1);

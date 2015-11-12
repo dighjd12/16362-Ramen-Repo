@@ -18,7 +18,7 @@ classdef stateEstimator < handle
             obj.worldLineArray = worldLineArray;
             obj.lidarSkip = lidarSkip;
             
-            obj.k = 0.25;
+            obj.k = 0.05;
         end
         function setInitPose(obj,initPose)
             obj.poseFused = initPose;
@@ -32,19 +32,26 @@ classdef stateEstimator < handle
             
             
             p = pose(obj.poseFused);
-          %  fprintf('posefused is [%d; %d; %d;]', obj.poseFused(1),obj.poseFused(2),obj.poseFused(3));
             [success, outPose] = refinePose(obj.lmLocalizer,p,modelPts,maxIters);
+
     
-            if(false)
+            if(success)
             %fixing poseFused
             
                 poseLidar = outPose.getPoseVec();
-                disp(poseLidar);
-                obj.poseFused(1,1) = obj.poseFused(1,1) + obj.k*(poseLidar(1,1)-obj.poseFused(1,1)); %change x
-                obj.poseFused(2,1) = obj.poseFused(2,1) + obj.k*(poseLidar(2,1)-obj.poseFused(2,1)); %change y
-                th2 = poseLidar(3,1);
-                th1 = obj.poseFused(3,1);
-                obj.poseFused(3,1) = obj.poseFused(3,1) + obj.k*(atan2(sin(th2-th1),cos(th2-th1)));
+                poseLidar = poseLidar';
+                
+                
+                
+                obj.poseFused = obj.poseFused.*(1-obj.k) + poseLidar.*obj.k;
+                
+                % uncomment to plot Lidar-only and Fused poses.
+                % Uncommented because it slows down execution.
+                %hold on;
+                %figure(2);
+                %plot(poseLidar(1), poseLidar(2), 'c+');
+                %plot(obj.poseFused(1), obj.poseFused(2), 'y+');
+                %hold off;
 
                
             end
@@ -64,9 +71,7 @@ classdef stateEstimator < handle
          %   pause(0.001);
         end
         
-        function processOdometryData(obj, x, y, th)
-            disp(nargin);
-            
+        function processOdometryData(obj, x, y, th)            
             obj.poseFused = [x,y,th];
         end
         function modelPts = processRangeImage(obj, robot)

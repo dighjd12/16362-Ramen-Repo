@@ -10,7 +10,9 @@ classdef mrplSystem < handle
     
     methods(Static=true)
         function obj = mrplSystem()
-            obj.ctrl = controller(0.0001,0.0001,0.06);
+            %obj.ctrl = controller(0.0001,0.0001,0.06);
+            %obj.ctrl = controller(0.0005,0.00001,0.3);
+            obj.ctrl = controller(0.0001,0.0000001,0.08);
             lines_p1 = [[0;0], [0;4]];
             lines_p2 = [[4;0], [0;0]];
             walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
@@ -30,6 +32,7 @@ classdef mrplSystem < handle
             obj.follower.lastPosef = startPose;
             obj.SE.setInitPose(obj.SE, obj.follower.lastPoser);
         end
+        
         function executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign)
             %make sure table is there.
             lastPose = obj.follower.lastPoser;
@@ -37,13 +40,15 @@ classdef mrplSystem < handle
             rth = lastPose(3);
             ry = lastPose(2);
             rx = lastPose(1);
+            
             fprintf('\nstart pose: %d %d %d \n', rx, ry, rth);
             fprintf('goal pose in world frame: %d %d %d \n',xfa,yfa,thfa);
-            %the matrix that transform from r frame to wolrd frame
+            
+            %the matrix that transform from r frame to world frame
             r_to_w_matrix = [cos(rth), -sin(rth), rx;
                              sin(rth),  cos(rth), ry;
                              0      ,  0      , 1];
-            %the matrix that transform from destination frame to wolrd
+            %the matrix that transform from destination frame to world
             %frame (destination, xfa,yfa,thfa)
             d_to_w_matrix = [cos(thfa), -sin(thfa), xfa;
                              sin(thfa),  cos(thfa), xfa;
@@ -52,9 +57,12 @@ classdef mrplSystem < handle
             w_to_r_matrix = r_to_w_matrix^-1;
             d_to_r_matrix = w_to_r_matrix * d_to_w_matrix;
             result = w_to_r_matrix * [xfa;yfa;1];
+            
+            
             %arctan of (sin(th)/cos(th)), th is the angle of destination
             %pose in robot frame
             th = atan2(-d_to_r_matrix(1,2),d_to_r_matrix(1,1));
+
             
             %r = [xfa;yfa;thfa] - lpa;
             fprintf('goal traj: %d %d %d \n', result(1), result(2), th);
@@ -67,8 +75,7 @@ classdef mrplSystem < handle
            % obj.follower.lastPoser = lpa;
            % obj.follower.lastPosef = lpd;
             
-            
-            obj.follower.feedForward(robot, obj.follower, true, 0.003);
+            obj.follower.feedForward(robot, obj.follower, true, 0.5);
             
             
         end
