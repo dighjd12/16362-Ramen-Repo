@@ -1,6 +1,7 @@
 classdef stateEstimator < handle
     
     properties(Access = public)
+    
         lmLocalizer;
         worldLineArray;
         lidarSkip;
@@ -8,9 +9,6 @@ classdef stateEstimator < handle
         poseFused;
         startPose;
         k;
-        
-        plidarArray;
-        i;
     end
     
     methods(Static = true)
@@ -20,51 +18,56 @@ classdef stateEstimator < handle
             obj.worldLineArray = worldLineArray;
             obj.lidarSkip = lidarSkip;
             
-            obj.plidarArray = zeros(3,1);
-            obj.i = 2;
-            obj.k = 0.15;
-            obj.poseFused = [0;0;0]; %posefused in robot start frame
+            obj.k = 0.25;
         end
-        function setInitPose(obj,initPose) 
+        function setInitPose(obj,initPose)
             obj.poseFused = initPose;
             obj.startPose = initPose;
         end
-        function pf = fusePose(obj, robot, dx, dy, dth, rsTowM)
+        function pf = fusePose(obj, robot, x, y, th)
             
-            obj.processOdometryData(obj, dx, dy, dth);
-            
-            %pose fused is in rs frame
+            obj.processOdometryData(obj, x, y, th);
             modelPts = obj.processRangeImage(obj, robot);
-            maxIters = 50;
+            maxIters = 20;
             
-            pf_w = pose.matToPoseVec(rsTowM * pose(obj.poseFused).bToA());
             
-            p = pose(pf_w);
+            p = pose(obj.poseFused);
           %  fprintf('posefused is [%d; %d; %d;]', obj.poseFused(1),obj.poseFused(2),obj.poseFused(3));
             [success, outPose] = refinePose(obj.lmLocalizer,p,modelPts,maxIters);
     
-            if(success)
-                poseLidar = outPose.getPoseVec(); %world frame
-                obj.plidarArray(:, obj.i) = poseLidar;
-                
-                pf_w(1,1) = pf_w(1,1) + obj.k*(poseLidar(1,1)-pf_w(1,1)); %change x
-                pf_w(2,1) = pf_w(2,1) + obj.k*(poseLidar(2,1)-pf_w(2,1)); %change y
-                th2 = poseLidar(3,1);
-                th1 = pf_w(3,1);
-                pf_w(3,1) = pf_w(3,1) + obj.k*(atan2(sin(th2-th1),cos(th2-th1)));
-            else
-                obj.plidarArray(:, obj.i) = [0;0;0];
-            end
-            obj.i= obj.i+1;
+            if(false)
+            %fixing poseFused
             
-            obj.poseFused = pose.matToPoseVec( (rsTowM^-1) * pose(pf_w).bToA());
+                poseLidar = outPose.getPoseVec();
+                disp(poseLidar);
+                obj.poseFused(1,1) = obj.poseFused(1,1) + obj.k*(poseLidar(1,1)-obj.poseFused(1,1)); %change x
+                obj.poseFused(2,1) = obj.poseFused(2,1) + obj.k*(poseLidar(2,1)-obj.poseFused(2,1)); %change y
+                th2 = poseLidar(3,1);
+                th1 = obj.poseFused(3,1);
+                obj.poseFused(3,1) = obj.poseFused(3,1) + obj.k*(atan2(sin(th2-th1),cos(th2-th1)));
+
+               
+            end
             pf = obj.poseFused;
-     
+            %%%%%%%%%%%%%%%%%%%%%%%%%%plotting below 
+%             worldLidarPts = robotModel.senToWorld(obj.poseFused)*modelPts;
+%             bodyPts1 = bToA(obj.poseFused)*robotModel.bodyGraph();
+% 
+%             %%%%%%%%%plotting%%%%%%%%%%
+%             figure(1)
+%             plot(obj.worldLineArray(1,:), obj.worldLineArray(2,:), '-b'); %plot walls
+%             hold on
+%             plot(bodyPts1(1,:),bodyPts1(2,:),'-g'); %robotPoints
+%             plot(worldLidarPts(1,:), worldLidarPts(2,:), '-xr'); %plot lidar points in sensor frame
+%             hold off
+%             %%%%%%%%%plotting%%%%%%%%%%
+         %   pause(0.001);
         end
         
-        function processOdometryData(obj, dx, dy, dth)
+        function processOdometryData(obj, x, y, th)
+            disp(nargin);
             
-            obj.poseFused = obj.poseFused + [dx;dy;dth];
+            obj.poseFused = [x,y,th];
         end
         function modelPts = processRangeImage(obj, robot)
             
