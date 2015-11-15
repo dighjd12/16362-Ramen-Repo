@@ -1,5 +1,5 @@
  %% start robot and laser
- robot = neato('zetta'); 
+ robot = neato('atto'); 
  %robot.startLaser();
  %% finsh
  robot.close();
@@ -59,14 +59,13 @@ startPose = outPose;
 close all;
 clc;
 mrpl = mrplSystem();
-%startPose = [0.5;0.5;pi/2]; % the pose we start in the world frame
+startPose = [0.5;0.5;pi/2]; % the pose we start in the world frame
 pose1 = [0.25;0.75;pi/2]; % first destination in world frame
 pose2 = [0.75;0.25;0]; % second destination in world frame
 pose3 = [0.5;0.5;pi/2]; % final destination in world frame
 
-figure(2);
 
-startPose = startPose.poseVec;
+%startPose = startPose.poseVec;
 
 mrpl.setInitialPose(mrpl,startPose);
 

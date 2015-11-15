@@ -217,11 +217,11 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 obj.vRealArray(i) = V;
                 obj.wRealArray(i) = w;
                 
-                %fprintf('\npose from odo:%d %d %d',rPoseInw(1),rPoseInw(2),rPoseInw(3));
+                fprintf('\npose from odo:%d %d %d',rPoseInw(1),rPoseInw(2),rPoseInw(3));
                if use_se == true
                    rPoseInw = obj.SE.fusePose(obj.SE,robot,rPoseInw(1),rPoseInw(2),...
                                                  rPoseInw(3));
-                  % fprintf('pose from fuse:%d %d %d\n',rPoseInw(1),rPoseInw(2),rPoseInw(3));
+                   fprintf('pose from fuse:%d %d %d\n',rPoseInw(1),rPoseInw(2),rPoseInw(3));
                    rInw = pose(rPoseInw);
                                          
                     rPoseInrs = pose.matToPoseVec(rsInw.aToB()*rInw.bToA());
@@ -238,8 +238,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 obj.errorSizeArray(i) = sqrt(obj.errorArray(i,1)^2+obj.errorArray(i,1)^2);
                 obj.errorArray(i,3)   = atan2(cos(ref_pose(3) - robot_pose(3)),...
                                              cos(ref_pose(3) - robot_pose(3)));
-                errorInRobotFrame(3) = atan2(cos(ref_pose(3) - robot_pose(3)),...
-                                          cos(ref_pose(3) - robot_pose(3)));
+                
                 if(feedback)
                     %get two control parameter from the controller
                     obj.controller.started = true;
