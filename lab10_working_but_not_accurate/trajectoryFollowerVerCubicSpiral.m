@@ -150,7 +150,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             tic;
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%  % robot traj
-            while time < (tf)
+            while time < (tf+delay)
                 pause(0.001);
                 time  = toc; 
                 %dt of this iteration(damn, dt is taken)
@@ -197,7 +197,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 robot_th = obj.realArray(i,3);
                 robot_x  = obj.realArray(i,1);
                 robot_y  = obj.realArray(i,2);
-                robot_pose = [robot_x,robot_y,robot_th];
+                robot_pose = [robot_x;robot_y;robot_th];
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % we convert the ref pose from robot frame to world frame
                 refInRefs = pose(ref_pose);
@@ -217,15 +217,17 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 obj.vRealArray(i) = V;
                 obj.wRealArray(i) = w;
                 
-                
+                %fprintf('\npose from odo:%d %d %d',rPoseInw(1),rPoseInw(2),rPoseInw(3));
                if use_se == true
-                   robot_pose = obj.SE.fusePose(obj.SE,robot,result3(1),result3(2),...
-                                                 atan2(-result4(1,2),result4(1,1)));
+                   rPoseInw = obj.SE.fusePose(obj.SE,robot,rPoseInw(1),rPoseInw(2),...
+                                                 rPoseInw(3));
+                  % fprintf('pose from fuse:%d %d %d\n',rPoseInw(1),rPoseInw(2),rPoseInw(3));
+                   rInw = pose(rPoseInw);
                                          
-                    result5 = (s_to_w_matrix^-1) * [robot_pose(1);robot_pose(2);1];
-                    robot_pose(1) = result5(1);
-                    robot_pose(2) = result5(2);
+                    rPoseInrs = pose.matToPoseVec(rsInw.aToB()*rInw.bToA());
+                    robot_pose = rPoseInrs;
                end
+              % disp(robot_pose);
                errorInStartFrame = [ref_pose(1)-robot_pose(1);
                                     ref_pose(2)-robot_pose(2);
                                     1                       ]; 
@@ -234,17 +236,16 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 obj.errorArray(i,1)   = errorInRobotFrame(1);
                 obj.errorArray(i,2)   = errorInRobotFrame(2);
                 obj.errorSizeArray(i) = sqrt(obj.errorArray(i,1)^2+obj.errorArray(i,1)^2);
-                obj.errorArray(i,3)   = ref_pose(3) - robot_pose(3);
-
+                obj.errorArray(i,3)   = atan2(cos(ref_pose(3) - robot_pose(3)),...
+                                             cos(ref_pose(3) - robot_pose(3)));
+                errorInRobotFrame(3) = atan2(cos(ref_pose(3) - robot_pose(3)),...
+                                          cos(ref_pose(3) - robot_pose(3)));
                 if(feedback)
                     %get two control parameter from the controller
                     obj.controller.started = true;
                    [v_control, w_control] =...
-                        obj.controller.velFeedback(obj.controller...
-                       ,obj.errorArray(:,1)...
-                       ,obj.errorArray(:,2)...
-                       ,obj.errorArray(:,3)...
-                       ,dtime);
+                        obj.controller.velFeedback(obj.controller,...
+                        errorInRobotFrame);
                 end
                 
                 % we get the V and w robot should have, if feedback  is
@@ -283,7 +284,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             title('ref');
             hold on;
             plot(obj.xpRefArray,obj.ypRefArray,'-b');
-            %plot(obj.xpRealArray,obj.ypRealArray,'-r');
+            plot(obj.xpRealArray,obj.ypRealArray,'-r');
             title('reference traj and real traj');
             %legend('Reference', 'Real');
             hold off

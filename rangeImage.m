@@ -25,8 +25,8 @@ classdef rangeImage < handle
                     n = n + 1;
                     obj.rArray(n) = ranges(i);
                     obj.thArray(n) = (i-1)*(pi/180);
-                    obj.xArray(n) = ranges(i)*(sin(obj.thArray(n)));
-                    obj.yArray(n) = ranges(i)*cos(obj.thArray(n));
+                    obj.xArray(n) = ranges(i)*cos(obj.thArray(n));
+                    obj.yArray(n) = ranges(i)*sin(obj.thArray(n));
                 end
                 obj.numPix = n;
                 if cleanFlag; obj.removeBadPoints(); end;
