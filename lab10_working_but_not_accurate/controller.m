@@ -30,16 +30,16 @@ classdef controller
                 y_d = (double(yErrorArray(end))-double(yErrorArray(end-1)))/dt;
                 th_d = (double(thErrorArray(end))-double(thErrorArray(end-1)))/dt;
                 
-                x_p = xErrorArray(end);
-                y_p = yErrorArray(end);
-                th_p = thErrorArray(end);
+                x_p = double(xErrorArray(end));
+                y_p = double(yErrorArray(end));
+                th_p = double(thErrorArray(end));
            
                 x_c = obj.kp * x_p + obj.ki * x_i + obj.kd * x_d;
                 y_c = obj.kp * y_p + obj.ki * y_i + obj.kd * y_d;
                 th_c = obj.kp * th_p + obj.ki * th_i + obj.kd * th_d;
            
                 V_control = x_c;
-                w_control = y_c;
+                w_control = y_c+th_c;
             else
                 V_control = 0;
                 w_control = 0;

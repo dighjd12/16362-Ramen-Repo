@@ -5,19 +5,23 @@ classdef mrplSystem < handle
         ctrl;
         follower;
         SE;
-        startPose;
+        lastStartPose;
     end
     
     methods(Static=true)
         function obj = mrplSystem()
             %obj.ctrl = controller(0.0001,0.0001,0.06);
             %obj.ctrl = controller(0.0005,0.00001,0.3);
-            obj.ctrl = controller(0.0001,0.0000001,0.08);
+            %obj.ctrl = controller(0.0001,0.000001,0.08);
+            obj.ctrl = controller(0.003,0,0);
             lines_p1 = [[0;0], [0;4]];
             lines_p2 = [[4;0], [0;0]];
             walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
             mrplSystem.addStateEstimator(obj, 10, lines_p1, lines_p2, walls);
             obj.follower = trajectoryFollowerVerCubicSpiral(obj.ctrl, obj.SE);
+            obj.lastStartPose = [0;0;0];
+            
+            
             
         end
         function addStateEstimator(obj, lidarSkip, lines_p1, lines_p2, worldLineArray)
@@ -35,49 +39,33 @@ classdef mrplSystem < handle
         
         function executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign)
             %make sure table is there.
+            
             lastPose = obj.follower.lastPoser;
             obj.SE.setInitPose(obj.SE, obj.follower.lastPoser);
-            rth = lastPose(3);
-            ry = lastPose(2);
-            rx = lastPose(1);
+            rsInW = pose(lastPose);
+            rfInW = pose(xfa,yfa,thfa);
             
-            fprintf('\nstart pose: %d %d %d \n', rx, ry, rth);
+            fprintf('\nstart pose: %d %d %d \n', rsInW.x, rsInW.y, rsInW.th);
             fprintf('goal pose in world frame: %d %d %d \n',xfa,yfa,thfa);
-            
-            %the matrix that transform from r frame to world frame
-            r_to_w_matrix = [cos(rth), -sin(rth), rx;
-                             sin(rth),  cos(rth), ry;
-                             0      ,  0      , 1];
-            %the matrix that transform from destination frame to world
-            %frame (destination, xfa,yfa,thfa)
-            d_to_w_matrix = [cos(thfa), -sin(thfa), xfa;
-                             sin(thfa),  cos(thfa), xfa;
-                             0      ,  0      , 1];
-            %we need d_to_r_matrix = w_to_r * d_to_w;
-            w_to_r_matrix = r_to_w_matrix^-1;
-            d_to_r_matrix = w_to_r_matrix * d_to_w_matrix;
-            result = w_to_r_matrix * [xfa;yfa;1];
-            
-            
-            %arctan of (sin(th)/cos(th)), th is the angle of destination
-            %pose in robot frame
-            th = atan2(-d_to_r_matrix(1,2),d_to_r_matrix(1,1));
+           
+            rfInrs = pose.matToPoseVec((rsInW.bToA()^-1) * rfInW.bToA());
 
             
             %r = [xfa;yfa;thfa] - lpa;
-            fprintf('goal traj: %d %d %d \n', result(1), result(2), th);
+            fprintf('goal traj: %d %d %d \n', rfInrs(1), rfInrs(2), rfInrs(3));
             
-            curve = cubicSpiral.planTrajectory(result(1),result(2),th,sign);
+            curve = cubicSpiral.planTrajectory(rfInrs(1), rfInrs(2), rfInrs(3),sign);
             vmax=.25;
             planVelocities(curve, vmax);
             obj.follower.trajectory = curve;
+            obj.follower.goalPose = [xfa,yfa,thfa];
            % obj.follower.startPose = obj.follower.lastPoser;
            % obj.follower.lastPoser = lpa;
            % obj.follower.lastPosef = lpd;
             
-            obj.follower.feedForward(robot, obj.follower, true, 0.5);
+            obj.follower.feedForward(robot, obj.follower, false, 0.05,false);
             
-            
+            obj.lastStartPose = [xfa,yfa,thfa];
         end
 %         function executeTrajectory(obj,robot,x,y,th,sign) %"main method"
 %             disp(nargin);

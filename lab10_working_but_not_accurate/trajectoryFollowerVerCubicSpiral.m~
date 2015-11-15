@@ -34,7 +34,6 @@ classdef trajectoryFollowerVerCubicSpiral < handle
         startPose;
         lastPoser;
         lastPosef;
-        goalPose;
     end
     methods(Static = true)
         % Function:     trajectoryFollowerVerCubicSpiral
@@ -73,7 +72,6 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             obj.robotPoseArray = zeros(1,3);
             obj.lastPoser = [0;0;0];
             obj.lastPosef = [0;0;0];
-            obj.goalPose = [0;0;0];
         end
         
         % Function:     loadTrajectory
@@ -142,7 +140,6 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             %matrix that convert from traj start frame to world frame
             rsInw = pose(obj.lastPoser);
             refsInw = pose(obj.lastPosef); 
-            obj.lastPosef = obj.goalPose;
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
              
             tf = getTrajectoryDuration(obj.trajectory);
@@ -202,15 +199,28 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 % we convert the ref pose from robot frame to world frame
                 refInRefs = pose(ref_pose);
                 refPoseInw = pose.matToPoseVec(refsInw.bToA()*refInRefs.bToA());
-                obj.xpRefArray(i) = refPoseInw(1);
-                obj.ypRefArray(i) = refPoseInw(2);
-                obj.thpRefArray(i) = refPoseInw(3);
+                obj.xpRefArray(i) = 
+                obj.ypRefArray(i) = result1(2);
+                obj.thpRefArray(i) = atan2(-result2(1,2),result2(1,1));
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 rInrs = pose(robot_pose);
-                rPoseInw = pose.matToPoseVec(rsInw.bToA()*rInrs.bToA() );
-                obj.xpRealArray(i) = rPoseInw(1);
-                obj.ypRealArray(i) = rPoseInw(2);
-                obj.thpRealArray(i) = rPoseInw(3);
+                r_to_rs = rInrs.bToA();
+                %disp(r_to_rs);
+                 %result3 = rs_to_w * [obj.realArray(i,1) ;obj.realArray(i,2) ;1];
+%                   realPose_to_rfs_matrix = [cos(obj.realArray(i,3)), -sin(obj.realArray(i,3)), obj.realArray(i,1);
+%                                            sin(obj.realArray(i,3)),  cos(obj.realArray(i,3)), obj.realArray(i,2);
+%                                             0                    ,  0                    , 1]; 
+%                                         disp(realPose_to_rfs_matrix);
+                  rPoseInw = pose.matToPoseVec( rs_to_w*r_to_rs );
+                  %disp(result3);
+                  %disp(rPoseInw);
+%                  result4 = realPose_to_rfs_matrix * s_to_w_matrix;
+%                  obj.xpRealArray(i) = result3(1);
+%                  obj.ypRealArray(i) = result3(2);
+%                  obj.thpRealArray(i) = atan2(-result4(1,2),result4(1,1));
+                  obj.xpRealArray(i) = rPoseInw(1);
+                  obj.ypRealArray(i) = rPoseInw(2);
+                  obj.thpRealArray(i) = rPoseInw(3);
   
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 obj.timeArray(i)  = time;
@@ -230,7 +240,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                                     ref_pose(2)-robot_pose(2);
                                     1                       ]; 
                 %we need the error vector in robot frame           
-                errorInRobotFrame     = (rInrs.bToA())^-1 * errorInStartFrame;
+                errorInRobotFrame     = (r_to_rs)^-1 * errorInStartFrame;
                 obj.errorArray(i,1)   = errorInRobotFrame(1);
                 obj.errorArray(i,2)   = errorInRobotFrame(2);
                 obj.errorSizeArray(i) = sqrt(obj.errorArray(i,1)^2+obj.errorArray(i,1)^2);
@@ -283,7 +293,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             title('ref');
             hold on;
             plot(obj.xpRefArray,obj.ypRefArray,'-b');
-            %plot(obj.xpRealArray,obj.ypRealArray,'-r');
+            plot(obj.xpRealArray,obj.ypRealArray,'-r');
             title('reference traj and real traj');
             %legend('Reference', 'Real');
             hold off
@@ -298,13 +308,10 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             obj.lastPoser = [obj.xpRealArray(end);
                              obj.ypRealArray(end);
                              obj.thpRealArray(end)];
-            obj.lastPosef = [obj.xpRealArray(end);
-                             obj.ypRealArray(end);
-                             obj.thpRealArray(end)];
             
-%              obj.lastPosef = [obj.xpRefArray(end);
-%                               obj.ypRefArray(end);
-%                               obj.thpRefArray(end)];
+            obj.lastPosef = [obj.xpRefArray(end);
+                             obj.ypRefArray(end);
+                             obj.thpRefArray(end)];
     
             disp('end of trajectory');
         end

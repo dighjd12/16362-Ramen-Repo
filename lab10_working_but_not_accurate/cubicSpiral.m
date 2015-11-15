@@ -251,7 +251,7 @@ classdef cubicSpiral < handle
                 as = -as;  
                 ss = -ss;
             end
-            curve = cubicSpiral([as bs ss],201);
+            curve = cubicSpiral([as bs ss],1001);
         end
             
     end

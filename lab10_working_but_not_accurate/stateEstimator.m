@@ -41,9 +41,14 @@ classdef stateEstimator < handle
                 poseLidar = outPose.getPoseVec();
                 poseLidar = poseLidar';
                 
+                x = obj.poseFused(1);
+                y = obj.poseFused(2);
+                th = obj.poseFused(3);
                 
-                
-                obj.poseFused = obj.poseFused.*(1-obj.k) + poseLidar.*obj.k;
+                obj.poseFused = [x*(1-obj.k) + poseLidar(1)*obj.k;...
+                                 y*(1-obj.k) + poseLidar(2)*obj.k;...
+                                 atan2(cos(th*(1-obj.k)+poseLidar(3)*obj.k),...
+                                       sin(th*(1-obj.k)+poseLidar(3)*obj.k))];
                 
                 % uncomment to plot Lidar-only and Fused poses.
                 % Uncommented because it slows down execution.
