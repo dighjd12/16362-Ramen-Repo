@@ -1,6 +1,6 @@
 %% start robot
 clc;
-robot = neato('atto'); 
+robot = neato('yotta'); 
 robot.startLaser();
 %% stop robot
 robot.close();
@@ -32,4 +32,8 @@ rInw = pose(mrpl.follower.lastPoser);
 gInw = pose.matToPoseVec(rInw.bToA()*goalInr.bToA());
 mrpl.executeTrajectorySE(mrpl,robot,gInw(1),gInw(2),gInw(3),1);
 
+%% 
+mrpl.moveRelDistance(mrpl,robot,0.15,0);
 
+%%
+mrpl.turnRelAngle(mrpl,robot,pi(),0);

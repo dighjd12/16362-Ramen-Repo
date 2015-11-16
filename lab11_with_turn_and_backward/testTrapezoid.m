@@ -76,16 +76,16 @@ tPause = 2;
 angle = pi();
 wmax = pi()/2;
 awmax = 3*pi()/2;
-sign = 1;
+sign = -1;
+delay = 0.003;
 tTurnCtrl = trapezoidalTurnReferenceControl(0, awmax, wmax, angle, sign);
-
+feedback = true;
 time=0;
 duration = tTurnCtrl.getTrajectoryDuration(tTurnCtrl);
 
-kp = 0.01; %proportional constant
-kd = 0.09; %derivative constant
+kp = 0.05; %proportional constant
+kd = 0.05; %derivative constant
 ki = 0.00001;
-feedback = false;
 
 thErrorArray = zeros(1,1);
 
@@ -106,14 +106,13 @@ i=2;
 
 elapsedTic = tic;
 while time < duration
-    pause(0.001);
     elapsedTime = toc(elapsedTic); %elapsedTime between this loop and the previous one
     time = time + elapsedTime;
     elapsedTic = tic;
     
     dtime = time - timeArray(end);
 
-    [V,w] = tTurnCtrl.computeControl(tTurnCtrl,time+ 0.003);
+    [V,w] = tTurnCtrl.computeControl(tTurnCtrl,time+delay);
     threfArray(i) = threfArray(i-1) + w*dtime;
     
     w_control = 0;
@@ -145,8 +144,15 @@ while time < duration
            
         w_control = th_c;
     end
+   
     
-    [vl,vr] = robotModel.VwTovlvr(robotModel,V,w+w_control);
+    [vl,vr] = robotModel.VwTovlvr(robotModel,V,w);
+    if(abs(vl)>0.3)
+        vl = 0.3;
+    end
+    if(abs(vr)>0.3)
+        vr = 0.3;
+    end
     
     timeArray(i) = time;
     wArray(i) = w;
