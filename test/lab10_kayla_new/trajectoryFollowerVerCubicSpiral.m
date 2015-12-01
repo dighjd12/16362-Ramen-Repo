@@ -133,24 +133,13 @@ classdef trajectoryFollowerVerCubicSpiral < handle
               fprintf('starting trajectory.. starting pose in world frame: %d %d %d\n' ...
                 ,obj.robotStart(1),obj.robotStart(2),obj.robotStart(3));
             
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%             rsTowMatrix = [cos(obj.lastPoser(3)), -sin(obj.lastPoser(3)),obj.lastPoser(1);
-%                            sin(obj.lastPoser(3)),  cos(obj.lastPoser(3)),obj.lastPoser(2);
-%                            0                ,  0                ,1];
-%             fsTowMatrix = [cos(obj.lastPosef(3)), -sin(obj.lastPosef(3)),obj.lastPosef(1);
-%                            sin(obj.lastPosef(3)),  cos(obj.lastPosef(3)),obj.lastPosef(2);
-%                            0,0,1];
-            %rsTowMatrix = rwTosMatrix^-1;
-            
             rsTowMatrix = pose(obj.robotStart).bToA();
             fsTowMatrix = pose(obj.robotStart).bToA();
-             
+            rcTowMatrix = rsTowMatrix;
+            rcTowMatrix2 = rsTowMatrix;
             tf = getTrajectoryDuration(obj.trajectory);
 
             tic;
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %myPlot = plot(xRealArray,yRealArray); %make real time plot of real 
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%  % robot traj
             while time < (tf)
                 pause(0.001);
                 time = toc; 
@@ -183,7 +172,7 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 %disp(w);
                 dth = w*dtime;
                 %last angle the robot is pointing
-                th = obj.thRealArray(i-1);
+                th = obj.thRealArray(i-1) + dth;
                 %the pose[x; y; th] robot should be at the time
                 ref_pose = getPoseAtTime(obj.trajectory,time);
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -199,11 +188,21 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 
                 dx = double(V*cos(th)*dtime);
                 dy = double(V*sin(th)*dtime);
+                dxc = double(V*cos(dth)*dtime);
+                dyc = double(V*sin(dth)*dtime);
+                
+                
+%                 obj.thRealArray(i) = obj.thRealArray(i-1) + dth;
+%                 obj.xRealArray(i) = obj.xRealArray(i-1) + dx;
+%                 obj.yRealArray(i) = obj.yRealArray(i-1) + dy;
+                
+                rcTowMatrix = rcTowMatrix * pose(dxc,dyc,dth).bToA(); %odometry
                 obj.thRealArray(i) = obj.thRealArray(i-1) + dth;
                 obj.xRealArray(i) = obj.xRealArray(i-1) + dx;
                 obj.yRealArray(i) = obj.yRealArray(i-1) + dy;
+                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                result1 = pose.matToPoseVec(rsTowMatrix * pose([obj.xRealArray(i);obj.yRealArray(i);obj.thRealArray(i)]).bToA()); %lastposer?
+                result1 = pose.matToPoseVec(rcTowMatrix); %lastposer?
                 result2 = pose.matToPoseVec(fsTowMatrix * pose([obj.xRefArray(i);obj.yRefArray(i);obj.thRefArray(i)]).bToA());
                 obj.xpRealArray(i) = result1(1);
                 obj.ypRealArray(i) = result1(2);
@@ -229,39 +228,40 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             
                 fusedInRSArray(:,i) = robot_pose;
                 fusedArray(:,i) = pose.matToPoseVec(rsTowMatrix * pose(robot_pose).bToA());
+                rcTowMatrix = rcTowMatrix * pose(dxc,dyc,dth).bToA();
                 % in world frame
                 
                 %the matrix that transform vector from robot frame to world
                 %frame
-                RtoWMatrix = [cos(robot_th) -sin(robot_th) robot_x;
-                              sin(robot_th)  cos(robot_th) robot_y;
-                              0              0             1];
-
-                WtoRMatrix = RtoWMatrix^-1; %inverse it we have world to robot
-                % ref_x - real_x and ref_y - real_y we have our error
-                % vector
-                errorInWorldFrame = [ref_pose(1)-robot_pose(1);
-                                     ref_pose(2)-robot_pose(2);
-                                     1]; 
-                %we need the error vector in robot frame           
-                errorInRobotFrame = WtoRMatrix * errorInWorldFrame;
-                obj.xErrorArray(i) = errorInRobotFrame(1);
-                obj.yErrorArray(i) = errorInRobotFrame(2);
-                obj.errorArray(i) = sqrt(obj.xErrorArray(i)^2+obj.yErrorArray(i)^2);
-                obj.thErrorArray(i) =ref_pose(3)-robot_pose(3);
-
-%                 th2 = ref_pose(3);
-%                 th1 = robot_pose(3);
-%                 %atan2(sin(th2-th1),cos(th2-th1));
-%                 errorVecInRSFrame = [ref_pose(1)-robot_pose(1);
-%                                   ref_pose(2)-robot_pose(2);
-%                                   th2-th1];
-%                 %we need the error vector in robot frame
-%                 errorInRobotFrame = WtoRMatrix * errorVecInRSFrame;
+%                 RtoWMatrix = [cos(robot_th) -sin(robot_th) robot_x;
+%                               sin(robot_th)  cos(robot_th) robot_y;
+%                               0              0             1];
+% 
+%                 WtoRMatrix = RtoWMatrix^-1; %inverse it we have world to robot
+%                 % ref_x - real_x and ref_y - real_y we have our error
+%                 % vector
+%                 errorInWorldFrame = [ref_pose(1)-robot_pose(1);
+%                                      ref_pose(2)-robot_pose(2);
+%                                      1]; 
+%                 %we need the error vector in robot frame           
+%                 errorInRobotFrame = WtoRMatrix * errorInWorldFrame;
 %                 obj.xErrorArray(i) = errorInRobotFrame(1);
 %                 obj.yErrorArray(i) = errorInRobotFrame(2);
-%                 obj.thErrorArray(i) = errorInRobotFrame(3);
 %                 obj.errorArray(i) = sqrt(obj.xErrorArray(i)^2+obj.yErrorArray(i)^2);
+%                 obj.thErrorArray(i) =ref_pose(3)-robot_pose(3);
+
+                th2 = ref_pose(3);
+                th1 = robot_pose(3);
+                tdiff = atan2(sin(th2-th1),cos(th2-th1));
+                errorVecInRSFrame = [ref_pose(1)-robot_pose(1);
+                                  ref_pose(2)-robot_pose(2);
+                                  tdiff];
+                %we need the error vector in robot frame
+                errorInRobotFrame = errorVecInRSFrame;
+                obj.xErrorArray(i) = errorInRobotFrame(1);
+                obj.yErrorArray(i) = errorInRobotFrame(2);
+                obj.thErrorArray(i) = errorInRobotFrame(3);
+                obj.errorArray(i) = sqrt(obj.xErrorArray(i)^2+obj.yErrorArray(i)^2);
 
                 if(feedback)
                     %get two control parameter from the controller
@@ -340,28 +340,33 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             figure (7);
             title('x: pf-red, pl-blue, po-green');
             hold on;
-            plot(obj.timeArray(1,:),odometryInRSArray(2,:),'-g');
-           % plot(obj.timeArray(1,:),obj.SE.plidarArray(2,:),'-b');
-            plot(obj.timeArray(1,:),fusedInRSArray(2,:),'-r');
+            plot(obj.timeArray(1,:),odometryInRSArray(1,:),'-g');
+            plot(obj.timeArray(1,:),fusedInRSArray(1,:),'-r');
             hold off
             figure (8);
             title('y: pf-red, pl-blue, po-green');
             hold on;
             plot(obj.timeArray(1,:),odometryInRSArray(2,:),'-g');
-          %  plot(obj.timeArray(1,:),obj.SE.plidarArray(2,:),'-b');
             plot(obj.timeArray(1,:),fusedInRSArray(2,:),'-r');
             hold off
             figure (9);
             title('th: pf-red, pl-blue, po-green');
             hold on;
-            plot(obj.timeArray(1,:),odometryInRSArray(2,:),'-g');
-            plot(obj.timeArray(1,:),obj.SE.plidarArray(2,:),'-b');
-            plot(obj.timeArray(1,:),fusedInRSArray(2,:),'-r');
+            plot(obj.timeArray(1,:),odometryInRSArray(3,:),'-g');
+            plot(obj.timeArray(1,:),fusedInRSArray(3,:),'-r');
             hold off
-            
+            disp('is this right??');
+            disp(pose.matToPoseVec(rcTowMatrix));
+            disp('xyth real array');
+            realArrs = [obj.xRealArray(end);
+                             obj.yRealArray(end);
+                             obj.thRealArray(end)]
+                         
+                         
             obj.lastPoser = [obj.xpRealArray(end);
                              obj.ypRealArray(end);
                              obj.thRealArray(end)];
+                         
             obj.lastPosef = [obj.xpRefArray(end);
                              obj.ypRefArray(end);
                              obj.thRefArray(end)];

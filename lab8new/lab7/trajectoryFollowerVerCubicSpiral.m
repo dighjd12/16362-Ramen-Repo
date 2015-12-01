@@ -274,6 +274,10 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                   obj.ypRefArray(end);
                   obj.thRefArray(end)];
             
+              disp(obj.xRealArray(end))
+              disp(obj.yRealArray(end))
+            disp(obj.thRealArray(end))
+              
       %      figure;
             %thErrorArray(thErrorArray > 10) = 0;
       %      plot(timeArray, xErrorArray);

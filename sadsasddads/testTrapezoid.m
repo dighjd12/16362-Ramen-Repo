@@ -55,11 +55,13 @@ while time < duration
     signedDistance = double(double(leftEncoder - leftStart)/1000); %in m
     
     if(feedback)
-        error = double(sdelay - signedDistance);
-        e_pro = double(error/1000); %in m
-        e_int = double(e_int) + error/1000; %in m*s
-        e_der = double((error-errorArray(end))/1000/(time-timeArray(end))); %in m/s
-        upid = kp*e_pro + ki * e_int + kd * e_der;
+        errorArray(i) = sdelay - signedDistance;
+        x_i = sum(errorArray);
+        x_d = (double(errorArray(end))-double(errorArray(end-1)))/dtime;
+        x_p = errorArray(end);
+        x_c = kp * x_p + ki * x_i + kd * x_d;
+           
+        upid = x_c;
     end
     ureal = vl + upid;
     

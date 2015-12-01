@@ -61,7 +61,7 @@ classdef mrplSystem < handle
            % obj.follower.lastPoser = lpa;
            % obj.follower.lastPosef = lpd;
             
-            obj.follower.feedForward(robot, obj.follower, true, 0.501);
+            obj.follower.feedForward(robot, obj.follower, true, 0.25);
             
             obj.follower.robotStart = [xfa;yfa;thfa];
         end

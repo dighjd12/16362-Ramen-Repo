@@ -128,10 +128,16 @@ classdef trajectoryFollowerVerCubicSpiral < handle
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
+            rz90 = [cos(pi()/2) -sin(pi()/2) 0;
+                    sin(pi()/2) cos(pi()/2) 0;
+                    0 0 1];
             rsTowMatrix = [cos(obj.lastPoser(3)), -sin(obj.lastPoser(3)), obj.lastPoser(1);
                            sin(obj.lastPoser(3)),  cos(obj.lastPoser(3)), obj.lastPoser(2);
                            0                    ,  0                    , 1];
                        % starting frame in world frame = T^w_s
+             %*******need lastPoser in world frame
+            rsTowM = rz90 * rsTowMatrix;
+             
             fsTowMatrix = [cos(obj.lastPosef(3)), -sin(obj.lastPosef(3)), obj.lastPosef(1);
                            sin(obj.lastPosef(3)),  cos(obj.lastPosef(3)), obj.lastPosef(2);
                            0                    ,  0                    , 1];

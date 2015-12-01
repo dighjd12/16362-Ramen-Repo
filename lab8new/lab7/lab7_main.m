@@ -1,5 +1,5 @@
 %% start robot  
-robot = neato('pico'); 
+robot = neato('sim'); 
 %% c
 robot.close();
 robot.shutdown();
@@ -17,9 +17,11 @@ mrpl.executeTrajectory(mrpl,robot,0.25,0.25,0.0,1);
 
 pause(1);
 
+
 mrpl.executeTrajectory(mrpl,robot,-0.5,-0.5,-pi()/2.0,1);
 
 pause(1);
+
 %disp(lp2);
 mrpl.executeTrajectory(mrpl,robot,-0.25,0.25,pi()/2.0,1);
 

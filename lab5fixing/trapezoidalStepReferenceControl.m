@@ -46,6 +46,7 @@ classdef trapezoidalStepReferenceControl
             V = V*obj.signFactor;
             
         end
+        
         end
         function duration = getTrajectoryDuration(obj)
             % Return the total time required for motion and for the

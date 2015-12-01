@@ -1,5 +1,5 @@
 %% start robot   
-robot = neato('yotta'); 
+robot = neato('atto'); 
 %%
 robot.startLaser();
 pause(3);
@@ -68,5 +68,7 @@ pause(1);
 mrpl.executeTrajectorySE(mrpl,robot,pose2(1),pose2(2),pose2(3),1);
 
 pause(1);
+
+%%
 
 mrpl.executeTrajectorySE(mrpl,robot,pose3(1),pose3(2),pose3(3),1);

@@ -33,7 +33,7 @@ classdef mrplSystem < handle
         function executeTrajectorySE(obj,robot,xfa,yfa,thfa,sign)
             %make sure table is there.
             lastPose = obj.follower.lastPoser;
-            obj.SE.setInitPose(obj.SE, obj.follower.lastPoser);
+            %obj.SE.setInitPose(obj.SE, obj.follower.lastPoser);
             rth = lastPose(3);
             ry = lastPose(2);
             rx = lastPose(1);

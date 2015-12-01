@@ -22,7 +22,7 @@ classdef stateEstimator < handle
             
             obj.plidarArray = zeros(3,1);
             obj.i = 2;
-            obj.k = 0.15;
+            obj.k = 0.10;
             obj.poseFused = [0;0;0]; %posefused in robot start frame
         end
         function setInitPose(obj,initPose) 

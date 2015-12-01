@@ -28,17 +28,17 @@ classdef stateEstimator < handle
             
             obj.processOdometryData(obj, dx, dy, dth);
             
-            obj.poseFused = pO;
+          %  obj.poseFused = pO;
             modelPts = obj.processRangeImage(obj, robot);
             maxIters = 20;
             
-            obj.poseFused = pO;
+          %  obj.poseFused = pO;
             
             p = pose(obj.poseFused);
           %  fprintf('posefused is [%d; %d; %d;]', obj.poseFused(1),obj.poseFused(2),obj.poseFused(3));
             [success, outPose] = refinePose(obj.lmLocalizer,p,modelPts,maxIters);
     
-            if(false)
+            if(success)
             %fixing poseFused
             
                 poseLidar = outPose.getPoseVec();

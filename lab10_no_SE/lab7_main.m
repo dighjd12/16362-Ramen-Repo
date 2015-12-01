@@ -58,12 +58,12 @@ startPose = outPose;
 %% drive robot in world frame
 close all;
 mrpl = mrplSystem();
-%startPose = [0.5;0.5;pi/2]; % the pose we start in the world frame
+startPose = [0.5;0.5;pi/2]; % the pose we start in the world frame
 pose1 = [0.25;0.75;pi/2]; % first destination in world frame
 pose2 = [0.75;0.25;0]; % second destination in world frame
 pose3 = [0.5;0.5;pi/2]; % final destination in world frame
 %startPose = [0.5;0.5;pi/2];
-startPose = startPose.poseVec;
+%startPose = startPose.poseVec;
 mat_f_to_w = [cos(startPose(3)), -sin(startPose(3)), startPose(1);
               sin(startPose(3)),  cos(startPose(3)), startPose(2);
               0                ,  0                , 1          ];
