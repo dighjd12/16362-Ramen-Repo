@@ -152,8 +152,8 @@ classdef mrplSystem < handle
         function turnRelAngle(obj,robot,angle,doControlPlotting)
             rpose = [0;0;0];
             tPause = 2;
-            wmax = pi()/4;
-            awmax = pi()/4;
+            wmax = pi()/3*1.4;
+            awmax = pi()*1.6;
             sign = 1;
             delay = 0.0;
             tTurnCtrl = trapezoidalTurnReferenceControl(tPause, awmax, wmax, angle, sign);
@@ -163,8 +163,8 @@ classdef mrplSystem < handle
             duration = tTurnCtrl.getTrajectoryDuration(tTurnCtrl);
 
             kp = 1e-3; %proportional constant
-            kd = 0.7e-3; %derivative constant
-            ki = 2e-4;
+            kd = 0.68e-3; %derivative constant
+            ki = 4.87e-4;
 
             thErrorArray = zeros(1,1);
 
@@ -246,16 +246,21 @@ classdef mrplSystem < handle
                 end
 
                 timeArray(i) = time;
-                wArray(i) = w;
+                wArray(i) = w+w_control;
                 i = i+1;
 
-                robot.sendVelocity(vl,vr);
+                if w+w_control>=0
+                    robot.sendVelocity(vl,vr);
+                end
             end
+            
+            robot.sendVelocity(0,0);
+            plot(timeArray, wArray);
             %rpose = [0;0;-pi];
             rInRs = pose(rpose);
             rsInw = pose(obj.follower.lastPoser);
             obj.follower.lastPoser = pose.matToPoseVec(rsInw.bToA()*rInRs.bToA());
-            robot.sendVelocity(0,0);
+            
         end
         
 %         function executeTrajectory(obj,robot,x,y,th,sign) %"main method"
