@@ -55,13 +55,11 @@ while time < duration
     signedDistance = double(double(leftEncoder - leftStart)/1000); %in m
     
     if(feedback)
-        errorArray(i) = sdelay - signedDistance;
-        x_i = sum(errorArray);
-        x_d = (double(errorArray(end))-double(errorArray(end-1)))/dtime;
-        x_p = errorArray(end);
-        x_c = kp * x_p + ki * x_i + kd * x_d;
-           
-        upid = x_c;
+        error = double(sdelay - signedDistance);
+        e_pro = double(error/1000); %in m
+        e_int = double(e_int) + error/1000; %in m*s
+        e_der = double((error-errorArray(end))/1000/(time-timeArray(end))); %in m/s
+        upid = kp*e_pro + ki * e_int + kd * e_der;
     end
     ureal = vl + upid;
     
@@ -78,16 +76,15 @@ tPause = 2;
 angle = pi();
 wmax = pi()/2;
 awmax = 3*pi()/2;
-sign = 1;
+sign = -1;
 tTurnCtrl = trapezoidalTurnReferenceControl(0, awmax, wmax, angle, sign);
 
 time=0;
 duration = tTurnCtrl.getTrajectoryDuration(tTurnCtrl);
 
-kp = 0.01; %proportional constant
-kd = 0.09; %derivative constant
+kp = 0.05; %proportional constant
+kd = 0.05; %derivative constant
 ki = 0.00001;
-feedback = false;
 
 thErrorArray = zeros(1,1);
 
@@ -108,14 +105,13 @@ i=2;
 
 elapsedTic = tic;
 while time < duration
-    pause(0.001);
     elapsedTime = toc(elapsedTic); %elapsedTime between this loop and the previous one
     time = time + elapsedTime;
     elapsedTic = tic;
     
     dtime = time - timeArray(end);
 
-    [V,w] = tTurnCtrl.computeControl(tTurnCtrl,time+ 0.003);
+    [V,w] = tTurnCtrl.computeControl(tTurnCtrl,time);
     threfArray(i) = threfArray(i-1) + w*dtime;
     
     w_control = 0;
@@ -148,7 +144,7 @@ while time < duration
         w_control = th_c;
     end
     
-    [vl,vr] = robotModel.VwTovlvr(robotModel,V,w+w_control);
+    [vl,vr] = robotModel.VwTovlvr(robotModel,V,w);
     
     timeArray(i) = time;
     wArray(i) = w;

@@ -42,7 +42,7 @@ modelPts = [xPoints; yPoints; ones(1,length(xPoints))];
 startPose = outPose;
 
     bodyPts = robotModel.bodyGraph();
-    bodyPts1 = bToA(robotPose)*bodyPts; 
+    bodyPts1 = bToA(robotPose)*bodyPts;
         worldLidarPts = robotModel.senToWorld(robotPose)*modelPts;
 
     

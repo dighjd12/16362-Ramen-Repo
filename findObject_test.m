@@ -12,4 +12,10 @@ disp('Laser values read');
 image.findObject();
 
 %%
-robot = neato('hecto');
+robot = neato('atto');
+%%
+robot.close();
+robot.shutdown();
+close all;
+clear all;
+clc;
