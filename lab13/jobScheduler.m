@@ -34,6 +34,7 @@ classdef jobScheduler
                     mrpl.moveRelDistance(mrpl,robot,0.1,0);
                     pause(1);
                     mrpl.turnRelAngle(mrpl,robot,pi(),0);
+                    j = j+1;
                 else
                     mrpl.moveRelDistance(mrpl,robot,-0.5,0);
                     mrpl.turnRelAngle(mrpl,robot,pi(),0);   
