@@ -14,10 +14,16 @@ classdef jobScheduler
             mrpl.turnRelAngle(mrpl,robot,pi(),0);
             i = 1;
             j = 1;
-            while j < length(obj.dropLocationList)
+            while j <= length(obj.dropLocationList)
                 pause(1);
                 pickPose = obj.pickUpLocationList(i,:);
                 dropPose = obj.dropLocationList(j,:);
+                
+                
+                disp('******************');
+                disp(pickPose);
+                disp(dropPose);
+                disp('******************');
                 mrpl.pickDropObject(mrpl,robot,pickPose);
                 robot.sendVelocity(0,0);
                 robot.forksUp();
@@ -25,6 +31,7 @@ classdef jobScheduler
                 reading = transpose(double(robot.laser.LatestMessage.Ranges));
                 image = rangeImage(reading,1,0); 
                 onBoard = image.isItOnBoard;
+                
                 if onBoard
                     pause(1);
                     mrpl.executeTrajectorySE(mrpl,robot,dropPose(1),dropPose(2),...
@@ -35,11 +42,14 @@ classdef jobScheduler
                     pause(1);
                     mrpl.turnRelAngle(mrpl,robot,pi(),0);
                     j = j+1;
+                    i = i+1;
                 else
+                    %check if the backup amount is enough!!!
                     mrpl.moveRelDistance(mrpl,robot,-0.5,0);
                     mrpl.turnRelAngle(mrpl,robot,pi(),0);   
                     i = i + 1;
                 end
             end
+        end
     end
 end

@@ -5,8 +5,9 @@ classdef rangeImage < handle
         maxUsefulRange = 1;
         minUsefulRange = 0.05;
         maxRangeForTarget = 1;
-        onBoardAngle = 76;
-        onBoardNum = obj.onBoardAngle * 0.6
+        onBoardAngle = 70;
+        %onBoardNum = 76 * 0.6
+        onBoardNum = 5;
     end
 
     properties(Access = public)
@@ -412,7 +413,7 @@ classdef rangeImage < handle
  end
  
  function yes = isItOnBoard(obj)
-          i = OnBoardAngle/2;
+          i = obj.onBoardAngle/2;
           num = 0;
           while i <= 360 - obj.onBoardAngle/2;
               if obj.rArray(i) ~= 0 && obj.rArray(i) < 0.3 ;
@@ -420,6 +421,7 @@ classdef rangeImage < handle
               end
               i = obj.dec(i);
           end
+          num
           if num > obj.onBoardNum
               yes = true;
           else

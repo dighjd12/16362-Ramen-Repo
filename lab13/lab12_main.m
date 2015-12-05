@@ -105,11 +105,7 @@ pickUpLocationList = [[0.25,1.2198,pi/2];...
                       [0.28*3,1.2198,pi/2]];
 dropLocationList = [[0.5334,0.3+0.145,-pi/2];...
                     [0.5334 + 0.4048*0.75,0.3+0.145,-pi/2];...
-                    [0.5334 + 0.4048*1.5,0.3+0.145,-pi/2]];
-
-
-
-                
+                    [0.5334 + 0.4048*1.5,0.3+0.145,-pi/2]];                
                 
 Js = jobScheduler(dropLocationList,pickUpLocationList,startPose);
 Js.scheduleJob(Js,robot,mrpl);

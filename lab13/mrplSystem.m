@@ -226,7 +226,7 @@ classdef mrplSystem < handle
                     th_p = thErrorArray(end);
                     th_c = kp * th_p + ki * th_i + kd * th_d;
 
-                    w_control = 0.2*th_c;
+                    w_control = 0.22*th_c;
                 end
 
                 [vl,vr] = robotModel.VwTovlvr(0,w+w_control);
