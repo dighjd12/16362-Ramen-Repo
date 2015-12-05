@@ -1,7 +1,7 @@
 
 %% start robot
-clc;
-robot = neato('exa'); 
+%clc;
+%robot = neato('exa'); 
 mrpl = mrplSystem(); 
 startPose = [0.228;0.228;-pi/2];
 robot.startLaser();

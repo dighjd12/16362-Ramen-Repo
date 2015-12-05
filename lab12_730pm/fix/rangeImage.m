@@ -48,7 +48,7 @@ classdef rangeImage < handle
         y_array = obj.yArray;
         for i = 1:length(r_array)
             if (r_array(i) > obj.maxUsefulRange || ...
-                r_array(i) < obj.minUsefulRange || (i > 20 && i < (360-20)))
+                r_array(i) < obj.minUsefulRange || (i > 15 && i < (360-15)))
                 r_array(i) = 0;
                 x_array(i) = 0;
                 y_array(i) = 0;

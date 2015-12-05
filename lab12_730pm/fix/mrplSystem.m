@@ -255,7 +255,7 @@ classdef mrplSystem < handle
             end
             
             robot.sendVelocity(0,0);
-            plot(timeArray, wArray);
+            %plot(timeArray, wArray);
             %rpose = [0;0;-pi];
             rInRs = pose(rpose);
             rsInw = pose(obj.follower.lastPoser);

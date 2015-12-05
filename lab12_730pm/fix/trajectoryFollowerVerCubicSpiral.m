@@ -175,9 +175,9 @@ classdef trajectoryFollowerVerCubicSpiral < handle
                 rds       = double(rightNow - rightLast); 
                 %rightLast = double(rightNow);
                 
-                if abs(lds) > 0.1 || abs(rds) > 0.1
-                    continue;
-                end
+%                 if abs(lds) >= 0.1 || abs(rds) >= 0.1
+%                     continue;
+%                 end
                 
                 leftLast = double(leftNow);
                 rightLast = double(rightNow);
