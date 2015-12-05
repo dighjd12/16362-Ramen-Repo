@@ -14,21 +14,22 @@ classdef mrplSystem < handle
             %obj.ctrl = controller(0.0005,0.00001,0.3);
             %obj.ctrl = controller(0.0001,0.000001,0.08);
             obj.ctrl = controller(8e-3,1e-2,-3e-3);
-            lines_p1 = [[0;0], [0;4]];
-            lines_p2 = [[4;0], [0;0]];
-            walls = [[4.0; 0.0], [0.0; 0.0], [0.0; 4.0]];
-            mrplSystem.addStateEstimator(obj, 10, lines_p1, lines_p2, walls);
+            lines_p1 = [[0;0], [0;1.219]]; % (0,0) to (0,1.219) - left wall
+            lines_p2 = [[1.219;0], [0;0]];
+            lines_p3 = [[1.219;0], [1.219;1.219]];
+            walls = [[1.219; 1.219], [1.219; 0.0], [0.0; 0.0], [0.0; 1.219]];
+            mrplSystem.addStateEstimator(obj, 10, lines_p1, lines_p2, lines_p3, walls);
             obj.follower = trajectoryFollowerVerCubicSpiral(obj.ctrl, obj.SE);
             obj.lastStartPose = [0;0;0];
             
             
             
         end
-        function addStateEstimator(obj, lidarSkip, lines_p1, lines_p2, worldLineArray)
+        function addStateEstimator(obj, lidarSkip, lines_p1, lines_p2, lines_p3, worldLineArray)
             gain = 0.01;
             errThresh = 0.001;
             gradThresh = 0.0005;
-            lmLocalizer = lineMapLocalizer(lines_p1,lines_p2,gain,errThresh,gradThresh);
+            lmLocalizer = lineMapLocalizer(lines_p1,lines_p2,lines_p3, gain,errThresh,gradThresh);
             obj.SE = stateEstimator(lmLocalizer, worldLineArray, lidarSkip);
         end
         function setInitialPose(obj, startPose)
