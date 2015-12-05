@@ -7,7 +7,7 @@ startPose = [0.228;0.228;-pi/2];
 robot.startLaser();
 %% stop robot
 robot.close();
-%robot.shutdown();
+robot.shutdown();
 clear all;
 close all;
 clc;
@@ -84,8 +84,8 @@ pickUpLocationList = [[0.29,1.2198,pi/2];...
                       [0.29*2,1.2198,pi/2];...
                       [0.29*3,1.2198,pi/2]];
 dropLocationList = [[0.5334,               0.3, -pi/2];...
-                    [0.5334 + 0.4048*0.75, 0.3, -pi/2];...
-                    [0.5334 + 0.4048*1.5,   0.3, -pi/2]];
+                    [0.5334 + 0.4048*0.75, 0.33, -pi/2];...
+                    [0.5334 + 0.4048*1.5,   0.36, -pi/2]];
 
 
 

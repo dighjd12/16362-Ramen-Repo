@@ -56,7 +56,7 @@ classdef mrplSystem < handle
             fprintf('goal traj: %d %d %d \n', rfInrs(1), rfInrs(2), rfInrs(3));
             
             curve = cubicSpiral.planTrajectory(rfInrs(1), rfInrs(2), rfInrs(3),sign);
-            vmax=.2;
+            vmax=.3;
             planVelocities(curve, vmax);
             obj.follower.trajectory = curve;
             obj.follower.goalPose = [xfa,yfa,thfa];
@@ -64,7 +64,7 @@ classdef mrplSystem < handle
            % obj.follower.lastPoser = lpa;
            % obj.follower.lastPosef = lpd;
             
-            obj.follower.feedForward(robot, obj.follower, true, 0.003,false);
+            obj.follower.feedForward(robot, obj.follower, true, 0.003,true);
             
             obj.lastStartPose = [xfa,yfa,thfa];
         end
