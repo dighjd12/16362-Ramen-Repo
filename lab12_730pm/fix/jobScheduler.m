@@ -14,24 +14,23 @@ classdef jobScheduler
             mrpl.turnRelAngle(mrpl,robot,pi(),0);
             robot.sendVelocity(0,0)
             for i = 1:length(obj.pickUpLocationList)
-                pause(1);
+                %pause(1);
                 pickPose = obj.pickUpLocationList(i,:);
                 dropPose = obj.dropLocationList(i,:);
                 mrpl.pickDropObject(mrpl,robot,pickPose);
                 robot.sendVelocity(0,0);
                 robot.forksUp();
-                pause(1);
+               % pause(1);
                 mrpl.turnRelAngle(mrpl,robot,pi(),0);
                 robot.sendVelocity(0,0);
-                pause(1);
+               % pause(1);
                 mrpl.executeTrajectorySE(mrpl,robot,dropPose(1),dropPose(2),...
                                          dropPose(3),1); 
                 robot.sendVelocity(0,0);
-                pause(1);
+               % pause(1);
                 robot.forksDown();
                 mrpl.moveRelDistance(mrpl,robot,0.1,0);
                 robot.sendVelocity(0,0);
-                pause(1);
                 mrpl.turnRelAngle(mrpl,robot,pi(),0);
                 robot.sendVelocity(0,0);
             end
