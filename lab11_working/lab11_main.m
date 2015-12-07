@@ -89,6 +89,6 @@ mrpl.executeTrajectorySE(mrpl,robot,gInw(1),gInw(2),gInw(3),1);
 robot.stopLaser();
 
 
-mrpl.moveRelDistance(mrpl,robot,0.15,0);
+%mrpl.moveRelDistance(mrpl,robot,0.15,0);
 
-mrpl.turnRelAngle(mrpl,robot,pi(),0);
+%mrpl.turnRelAngle(mrpl,robot,pi(),0);
